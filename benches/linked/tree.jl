@@ -1,5 +1,5 @@
 using Random
-using Printf
+using Serialization
 
 mutable struct TreeNode
    key::Int
@@ -26,26 +26,11 @@ function insert(key, n::TreeNode)
    end
 end
 
-function printTree(n::TreeNode)
-   if isdefined(n,:left)
-      printTree(n.left)
-   end
-
-   @printf("node = %d\n", n.key)
-
-   if isdefined(n,:right)
-      printTree(n.right)
-   end
-end
-
 function sumTree(n::TreeNode)
-   sum = 0
+   sum = n.key
    if isdefined(n,:left)
       sum += sumTree(n.left)
    end
-
-   sum += n.key
-
    if isdefined(n,:right)
        sum += sumTree(n.right)
    end
@@ -53,28 +38,23 @@ function sumTree(n::TreeNode)
    return sum
 end
 
-
 function tree(n)
-    rng = MersenneTwister(12345)
+    rng = Xoshiro(12345)
     temp = rand(rng, Int, n)
     root::TreeNode = TreeNode(temp[1])
     for i = 2:n
        insert(temp[i], root)
     end
-    @printf("\n\nSum of %d numbers = %d\n\n ", n, sumTree(root))
+    return sumTree(root)
 end
 
-function test(iters, n)
-   for i = 1:iters
-    @time tree(n)
-   end
-end
-
-# iterations is the number of trees
 # tree_size is the number of elements in mb
-rng = MersenneTwister(12345)
-iterations = parse(Int64, ARGS[1])
-tree_size = parse(Int64, ARGS[2])
+function bench(iters, tree_size=4)
+    times = zeros(Float64, iters)
+    for i in 1:iters
+        times[i] = @elapsed tree(tree_size*1024^2)
+    end
+    return times
+end
 
-
-test(iterations, tree_size * 1024 * 1024)
+serialize(stdout, bench(parse(Int,ARGS[1])))

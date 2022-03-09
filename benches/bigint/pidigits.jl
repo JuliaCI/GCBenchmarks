@@ -1,3 +1,5 @@
+using Serialization
+
 # The Computer Language Benchmarks Game
 # https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
@@ -43,5 +45,12 @@ function pidigits(N::Int)
     end
 end
 
-n = parse(Int,ARGS[1])
-@time pidigits(n)
+function bench(iters, digits=68470)
+    times = zeros(Float64, iters)
+    for i in 1:iters
+        times[i] = @elapsed pidigits(digits)
+    end
+    return times
+end
+
+serialize(stdout, bench(parse(Int,ARGS[1])))
