@@ -1,5 +1,4 @@
-using Serialization
-
+include("../../utils.jl")
 # The Computer Language Benchmarks Game
 # https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
@@ -8,7 +7,7 @@ using Serialization
 #print_line(ns, i) = println(rpad(string(ns), 10), '\t', ':', i)
 print_line(ns,i) = 0
 
-function pidigits(N::Int)
+function pidigits(N=68470)
     i = k = ns = 0
     k1 = 1
     n,a,d,t,u = map(BigInt,(1,0,1,0,0))
@@ -45,12 +44,5 @@ function pidigits(N::Int)
     end
 end
 
-function bench(iters, digits=68470)
-    times = zeros(Float64, iters)
-    for i in 1:iters
-        times[i] = @elapsed pidigits(digits)
-    end
-    return times
-end
-
-serialize(stdout, bench(parse(Int,ARGS[1])))
+n::Int = parse(Int,ARGS[1])
+@gctime n pidigits()

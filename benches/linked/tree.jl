@@ -1,5 +1,5 @@
+include("../../utils.jl")
 using Random
-using Serialization
 
 mutable struct TreeNode
    key::Int
@@ -38,7 +38,9 @@ function sumTree(n::TreeNode)
    return sum
 end
 
-function tree(n)
+# tree_size is the number of elements in mb
+function tree(n=4)
+    n *= 1024^2
     rng = Xoshiro(12345)
     temp = rand(rng, Int, n)
     root::TreeNode = TreeNode(temp[1])
@@ -48,13 +50,5 @@ function tree(n)
     return sumTree(root)
 end
 
-# tree_size is the number of elements in mb
-function bench(iters, tree_size=4)
-    times = zeros(Float64, iters)
-    for i in 1:iters
-        times[i] = @elapsed tree(tree_size*1024^2)
-    end
-    return times
-end
-
-serialize(stdout, bench(parse(Int,ARGS[1])))
+n::Int = parse(Int,ARGS[1])
+@gctime n tree()

@@ -1,6 +1,6 @@
-using Serialization
+include("../../utils.jl")
 
-function pollardfactor(n::T) where T<:Integer
+function pollardfactor(n::T=big(1208925819691594988651321)) where T<:Integer
     for c in T(1):(n - 3)
         G, r, q = ones(T,3)
         y = 2
@@ -36,13 +36,5 @@ function pollardfactor(n::T) where T<:Integer
     end
 end
 
-
-function bench(iters, digits=68470)
-    times = zeros(Float64, iters)
-    for i in 1:iters
-        times[i] = @elapsed pollardfactor(big(1208925819691594988651321))
-    end
-    return times
-end
-
-serialize(stdout, bench(parse(Int,ARGS[1])))
+n::Int = parse(Int,ARGS[1])
+@gctime n pollardfactor()

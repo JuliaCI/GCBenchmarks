@@ -1,5 +1,5 @@
+include("../../utils.jl")
 using Cthulhu
-using Serialization
 
 module TortureTest
 
@@ -39,12 +39,5 @@ module TortureTest
 
 end
 
-function bench(iters)
-    times = zeros(Float64, iters)
-    for i in 1:iters
-        times[i] = @elapsed Cthulhu.mkinterp(TortureTest.run_test1, Tuple{Int});
-    end
-    return times
-end
-
-serialize(stdout, bench(parse(Int,ARGS[1])))
+n::Int = parse(Int,ARGS[1])
+@gctime n Cthulhu.mkinterp(TortureTest.run_test1, Tuple{Int})[end].precompiled

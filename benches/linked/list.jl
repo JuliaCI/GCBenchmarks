@@ -1,4 +1,4 @@
-using Serialization
+include("../../utils.jl")
 
 mutable struct ListNode
   key::Int64
@@ -8,20 +8,15 @@ mutable struct ListNode
   ListNode(x,y) = new(x,y);
 end
 
-function list(n)
+function list(n=128)
     start::ListNode = ListNode(1)
     current::ListNode = start
-    for i = 2:n
+    for i = 2:(n*1024^2)
         current = ListNode(i,current)
     end
+    return current
 end
 
-function bench(iters, tree_size=128)
-    times = zeros(Float64, iters)
-    for i in 1:iters
-        times[i] = @elapsed list(tree_size*1024^2)
-    end
-    return times
-end
+n::Int = parse(Int,ARGS[1])
+@gctime n list()
 
-serialize(stdout, bench(parse(Int,ARGS[1])))
