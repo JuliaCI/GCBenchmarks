@@ -14,7 +14,7 @@ function list(n=128)
     for i = 2:(n*1024^2)
         current = ListNode(i,current)
     end
-    return current
+    return current.key
 end
 
 n::Int = parse(Int,ARGS[1])
