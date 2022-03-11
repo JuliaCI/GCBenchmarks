@@ -4,9 +4,6 @@ include("../../utils.jl")
 
 # based on Mario Pernici Python's program
 
-#print_line(ns, i) = println(rpad(string(ns), 10), '\t', ':', i)
-print_line(ns,i) = 0
-
 function pidigits(N=68470)
     i = k = ns = 0
     k1 = 1
@@ -26,13 +23,11 @@ function pidigits(N=68470)
             u += n
             if d > u
                 if i >= N
-                    print_line(ns, i)
                     return ns
                 end
                 ns = ns*10 + t
                 i += 1
                 if mod(i,10) == 0
-                    print_line(ns, i)
                     ns = 0
                 end
                 a -= d*t
@@ -44,5 +39,4 @@ function pidigits(N=68470)
     end
 end
 
-n::Int = parse(Int,ARGS[1])
-@gctime n pidigits()
+@gctime pidigits()

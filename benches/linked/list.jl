@@ -17,6 +17,5 @@ function list(n=128)
     return current.key
 end
 
-n::Int = parse(Int,ARGS[1])
-@gctime n list()
+@gctime list()
 

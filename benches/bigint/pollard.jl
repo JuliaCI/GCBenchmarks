@@ -36,5 +36,4 @@ function pollardfactor(n::T=big(1208925819691594988651321)) where T<:Integer
     end
 end
 
-n::Int = parse(Int,ARGS[1])
-@gctime n pollardfactor()
+@gctime pollardfactor()

@@ -50,5 +50,4 @@ function tree(n=4)
     return sumTree(root)
 end
 
-n::Int = parse(Int,ARGS[1])
-@gctime n tree()
+@gctime tree()
