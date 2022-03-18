@@ -38,6 +38,5 @@ module TortureTest
     end
 
 end
-
-n::Int = parse(Int,ARGS[1])
-@gctime n Cthulhu.mkinterp(TortureTest.run_test1, Tuple{Int})[end].precompiled
+                    
+@gctime Cthulhu.mkinterp(TortureTest.run_test1, Tuple{Int})[end].precompiled
