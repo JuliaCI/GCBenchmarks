@@ -39,4 +39,4 @@ module TortureTest
 
 end
                     
-@gctime Cthulhu.mkinterp(TortureTest.run_test1, Tuple{Int})[end].precompiled
+@gctime Cthulhu.mkinterp(TortureTest.run_test1, Tuple{Int})[end].inInference
