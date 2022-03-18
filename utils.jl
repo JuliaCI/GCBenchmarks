@@ -1,8 +1,9 @@
 using Serialization
 
 macro gctime(ex)
+    fc = isdefined(Base.Experimental, Symbol("@force_compile")) ? :(Base.Experimental.@force_compile) : :()
     quote
-        Base.Experimental.@force_compile
+        $fc
         n = isempty(ARGS) ? 1 : parse(Int, ARGS[1])
         local times = Vector{Float64}(undef, n)
         local vals = Vector{Any}(undef, n)
