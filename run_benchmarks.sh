@@ -21,3 +21,5 @@ echo "burn.jl"
 $JULIA_EXE burn.jl
 echo "tree.jl 5 4"
 $JULIA_EXE tree.jl 5 4
+echo "fileio.jl"
+$JULIA_EXE fileio.jl
