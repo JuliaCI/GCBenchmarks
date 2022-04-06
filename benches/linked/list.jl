@@ -1,5 +1,4 @@
-using Random
-using Printf
+include("../../utils.jl")
 
 mutable struct ListNode
   key::Int64
@@ -9,12 +8,14 @@ mutable struct ListNode
   ListNode(x,y) = new(x,y);
 end
 
-function list(n)
+function list(n=128)
     start::ListNode = ListNode(1)
     current::ListNode = start
- for i = 2:n
-          current = ListNode(i,current)
-      end
+    for i = 2:(n*1024^2)
+        current = ListNode(i,current)
+    end
+    return current.key
 end
 
-@time list(128*1024*1024)
+@gctime list()
+
