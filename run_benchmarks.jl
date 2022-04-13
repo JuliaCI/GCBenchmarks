@@ -1,11 +1,14 @@
 using Statistics
 using Serialization
-import Base.GC_Diff
+using Printf
 
 const RUNS = isempty(ARGS) ? 10 : parse(Int, ARGS[1])
 const JULIAVER = Base.julia_cmd()[1]
 dir = joinpath(@__DIR__, "benches")
 cd(dir)
+
+gctime(stat) = stat.total_time
+
 for category in readdir()
     @show category
     cd(category)
@@ -13,9 +16,16 @@ for category in readdir()
         endswith(test, ".jl") || continue
         @show test
         result = open(deserialize, `$JULIAVER --project=. $test $RUNS SERIALIZE`)
-        #result=(value, times, bytes, gctime, gcstats)
-        println("median time: ", median(result.times))
-        println("mean GC time: ", result.gctime)
+        (value, times, stats)= result
+        @printf("run time: %0.0fs min, %0.0fs max %0.0fs median\n",
+           minimum(result.times)/ 1000000000,
+           maximum(result.times)/ 1000000000,
+           median(result.times) / 1000000000)
+        time = map(gctime, stats)
+        @printf("gc time: %0.0fms min, %0.0fms max, %0.0fms median\n",
+           minimum(time)/ 1000000,
+           maximum(time)/ 1000000,
+           median(time) / 1000000)
     end
     cd("..")
 end
