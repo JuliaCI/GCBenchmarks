@@ -13,9 +13,9 @@ macro gctime(ex)
             vals[i] = $(esc(ex))
             times[i] = time_ns()
         end
-        local diff = Base.GC_Diff(Base.gc_num(), stats)
+        local gc_diff = Base.GC_Diff(Base.gc_num(), stats)
         times = diff(times) ./ 1e9
-        result = (value=vals, times=times, bytes=diff.allocd, gctime=diff.total_time/(1e9*n), gcstats=diff)
+        result = (value=vals, times=times, bytes=gc_diff.allocd, gctime=gc_diff.total_time/(1e9*n), gcstats=gc_diff)
         ARGS[end] == "SERIALIZE" ? serialize(stdout, result) : display(result)
     end
 end
