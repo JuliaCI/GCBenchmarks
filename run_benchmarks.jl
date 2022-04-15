@@ -17,10 +17,10 @@ for category in readdir()
         @show test
         result = open(deserialize, `$JULIAVER --project=. $test $RUNS SERIALIZE`)
         (value, times, stats)= result
-        @printf("run time: %0.0fs min, %0.0fs max %0.0fs median\n",
-           minimum(result.times)/ 1_000_000_000,
-           maximum(result.times)/ 1_000_000_000,
-           median(result.times) / 1_000_000_000)
+        @printf("run time: %0.0fms min, %0.0fms max %0.0fms median\n",
+           minimum(result.times)/ 1_000_000,
+           maximum(result.times)/ 1_000_000,
+           median(result.times) / 1_000_000)
         time = map(gctime, stats)
         @printf("gc time: %0.0fms min, %0.0fms max, %0.0fms median\n",
            minimum(time)/ 1_000_000,
