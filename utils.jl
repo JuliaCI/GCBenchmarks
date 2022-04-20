@@ -9,7 +9,7 @@ macro gctime(ex)
         local val = $(esc(ex))
         local t1 = time_ns()
         local diff = Base.GC_Diff(Base.gc_num(), stats)
-        result = (value=val, time=(t1 - t0) / 1e9, bytes=diff.allocd, gctime=diff.total_time/(1e9*n), gcstats=diff)
+        result = (value=val, time=(t1 - t0) / 1e9, bytes=diff.allocd, gctime=diff.total_time/(1e9), gcstats=diff)
         "SERIALIZE" in ARGS ? serialize(stdout, result) : display(result)
     end
 end
