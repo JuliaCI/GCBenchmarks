@@ -20,9 +20,11 @@ version = "1.0.7"
 
 [[deps.Cthulhu]]
 deps = ["CodeTracking", "FoldingTrees", "InteractiveUtils", "REPL", "UUIDs", "Unicode"]
-git-tree-sha1 = "a0217c513372244bb17943c1293533f86d4549b2"
+git-tree-sha1 = "1e624df6c5b3466caecfeb7d6e5330221a941133"
+repo-rev = "master"
+repo-url = "https://github.com/JuliaDebug/Cthulhu.jl.git"
 uuid = "f68482b8-f384-11e8-15f7-abe071a5a75f"
-version = "2.5.1"
+version = "2.5.3"
 
 [[deps.FoldingTrees]]
 deps = ["AbstractTrees", "REPL"]
