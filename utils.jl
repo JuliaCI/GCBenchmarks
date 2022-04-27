@@ -1,5 +1,7 @@
 using Serialization
 
+
+
 macro gctime(ex)
     fc = isdefined(Base.Experimental, Symbol("@force_compile")) ? :(Base.Experimental.@force_compile) : :()
     quote
@@ -7,15 +9,15 @@ macro gctime(ex)
         n = isempty(ARGS) ? 1 : parse(Int, ARGS[1])
         local times = Vector{Float64}(undef, n)
         local vals = Vector{Any}(undef, n)
-        local stats = Base.gc_num()
-        t0 = time_ns()
+        local stats = Vector{Base.GC_Diff}(undef, n)
         for i in 1:n
+            start_time = time_ns()
+            start_gc_num = Base.gc_num()
             vals[i] = $(esc(ex))
-            times[i] = time_ns()
+            times[i] = time_ns() - start_time
+            stats[i] = Base.GC_Diff(Base.gc_num(), start_gc_num)
         end
-        local diff = Base.GC_Diff(Base.gc_num(), stats)
-        @. times = (times - t0) / 1e9
-        result = (value=vals, times=times, bytes=diff.allocd, gctime=diff.total_time/(1e9*n), gcstats=diff)
+        result = (value=vals, times=times, stasts=stats)
         ARGS[end] == "SERIALIZE" ? serialize(stdout, result) : display(result)
     end
 end

@@ -94,9 +94,6 @@ end
 
 function tree(root::TreeNode, n)
    for i in 1:n
-      for j in 1:32
-         randstring("ACTG",rand(1:32))
-      end
       insert(root, TreeNode(randstring("ACTG", rand(1:32))), compareKey,duplicateKey)
    end
 end
