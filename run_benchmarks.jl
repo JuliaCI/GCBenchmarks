@@ -8,6 +8,8 @@ dir = joinpath(@__DIR__, "benches")
 cd(dir)
 
 gctime(stat) = stat.total_time
+max_pause(gc_num) = gc_num.max_pause
+max_memory(gc_num) = gc_num.max_memory
 
 for category in readdir()
     @show category
@@ -16,7 +18,7 @@ for category in readdir()
         endswith(test, ".jl") || continue
         @show test
         result = open(deserialize, `$JULIAVER --project=. $test $RUNS SERIALIZE`)
-        (value, times, stats)= result
+        (value, times, stats, gc_num)= result
         @printf("run time: %0.0fms min, %0.0fms max %0.0fms median\n",
            minimum(result.times)/ 1_000_000,
            maximum(result.times)/ 1_000_000,
@@ -26,7 +28,13 @@ for category in readdir()
            minimum(time)/ 1_000_000,
            maximum(time)/ 1_000_000,
            median(time) / 1_000_000)
+
+           pause = map(max_pause, gc_num)
+           @printf("max pause = %0.0fms\n", maximum(pause)/ 1_000_000)
+
+           max_mem = map(max_memory, gc_num)
+           @printf("max memory = %0.0fmb\n", maximum(max_mem)/ 1_000_000)
+
     end
     cd("..")
 end
-
