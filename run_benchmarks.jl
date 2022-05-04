@@ -1,15 +1,17 @@
+# Usage:
+#   julia run_benchmarks.jl [<#runs> <#threads>]
+
 using Statistics
 using Serialization
-import Base.GC_Diff
+using Printf
 
 const RUNS = isempty(ARGS) ? 10 : parse(Int, ARGS[1])
+const THREADS = isempty(ARGS) ? 1 : parse(Int, ARGS[2])
 const JULIAVER = Base.julia_cmd()[1]
 dir = joinpath(@__DIR__, "benches")
 cd(dir)
 
 gctime(stat) = stat.total_time
-max_pause(gc_num) = gc_num.max_pause
-max_memory(gc_num) = gc_num.max_memory
 
 for category in readdir()
     @show category
@@ -17,18 +19,25 @@ for category in readdir()
     for test in readdir()
         endswith(test, ".jl") || continue
         @show test
-        result = (value=[], time=[], bytes=[], gctime=[], gcstats=[])
+        value = []
+        times = []
+        stats = []
         for _ in 1:RUNS
-            r = open(deserialize, `$JULIAVER --project=. $test SERIALIZE`)
-            push!(result.value,   r.value)
-            push!(result.time,    r.time)
-            push!(result.bytes,   r.bytes)
-            push!(result.gctime,  r.gctime)
-            push!(result.gcstats, r.gcstats)
+            r = open(deserialize, `$JULIAVER --project=. --threads=$THREADS $test SERIALIZE`)
+            push!(value, r.value)
+            push!(times, r.times)
+            push!(stats, r.stats)
         end
-        #result=(value, time, bytes, gctime, gcstats)
-        println("median time: ", median(result.time))
-        println("mean GC time: ", result.gctime)
+        @printf("run time: %0.0fms min, %0.0fms max %0.0fms median\n",
+           minimum(times) / 1_000_000,
+           maximum(times) / 1_000_000,
+           median(times)  / 1_000_000)
+        time = map(gctime, stats)
+        @printf("gc time: %0.0fms min, %0.0fms max, %0.0fms median\n",
+           minimum(time) / 1_000_000,
+           maximum(time) / 1_000_000,
+           median(time)  / 1_000_000)
     end
     cd("..")
 end
+
