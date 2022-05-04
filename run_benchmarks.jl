@@ -32,6 +32,8 @@ function run_one_bench(runs, threads, file)
     value = []
     times = []
     stats = []
+    @show pwd()
+    show(`$JULIAVER --project=. --threads=$threads $file SERIALIZE`)
     for _ in 1:runs
         r = open(deserialize, `$JULIAVER --project=. --threads=$threads $file SERIALIZE`)
         push!(value, r.value)
@@ -54,8 +56,8 @@ function run_all_benches(runs, threads)
         @show category
         cd(category)
         for file in readdir()
-            @show file
             endswith(file, ".jl") || continue
+            @show file
             run_one_bench(runs, threads, file)
         end
     end
