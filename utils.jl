@@ -1,3 +1,5 @@
+using Pkg
+Pkg.instantiate() # It is dumb that I have to do this
 using Serialization
 
 macro gctime(ex)
