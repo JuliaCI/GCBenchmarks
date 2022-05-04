@@ -58,8 +58,8 @@ function run_all_benches(runs, threads)
             @show file
             run_one_bench(runs, threads, file)
         end
-        cd("..")
     end
+    cd("..")
 end
 
 function main()
