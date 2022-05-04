@@ -22,6 +22,8 @@ We expect the list of benchmarks to change over time, but for now we have the fo
 ### list.jl
 ### tree.jl
 ### strings.jl
+### tree_immutable.jl (perfect binary tree)
+### tree_mutable.jl (perfect binary tree)
 
 ## The results
 
