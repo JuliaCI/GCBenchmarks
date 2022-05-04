@@ -15,8 +15,15 @@ for category in readdir()
     for test in readdir()
         endswith(test, ".jl") || continue
         @show test
-        result = open(deserialize, `$JULIAVER --project=. $test $RUNS SERIALIZE`)
-        (value, times, stats)= result
+        value=[]
+        times=[]
+        stats=[]
+        for _ in 1:RUNS
+            r = open(deserialize, `$JULIAVER --project=. $test SERIALIZE`)
+            push!(value, r.value)
+            push!(times, r.times)
+            push!(stats, r.stats)
+        end
         @printf("run time: %0.0fms min, %0.0fms max %0.0fms median\n",
            minimum(result.times)/ 1_000_000,
            maximum(result.times)/ 1_000_000,
