@@ -3,7 +3,6 @@ using Serialization
 using Printf
 using ArgParse
 
-const RUNS = isempty(ARGS) ? 10 : parse(Int, ARGS[1])
 const JULIAVER = Base.julia_cmd()[1]
 
 function parse_commandline()
