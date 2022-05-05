@@ -2,6 +2,7 @@ using Statistics
 using Serialization
 using Printf
 using ArgParse
+using PrettyTables
 
 const JULIAVER = Base.julia_cmd()[1]
 
@@ -26,7 +27,23 @@ function parse_commandline()
     return parse_args(s)
 end
 
-gctime(stat) = stat.total_time
+# times in ns
+# TODO: get better stats
+function get_stats(times::Vector)
+    return [minimum(times), median(times), maximum(times)]
+end
+
+"""
+    Highlights cells in a column based on value
+        green if less than lo
+        yellow if between lo and hi
+        red if above hi
+"""
+function highlight_col(col, lo, hi)
+    [Highlighter((data,i,j) -> (j == col) && data[i, j] <= lo; foreground=:green),
+     Highlighter((data,i,j) -> (j == col) && lo < data[i, j] < hi; foreground=:yellow),
+     Highlighter((data,i,j) -> (j == col) && hi <= data[i, j]; foreground=:red),]
+end
 
 function run_one_bench(runs, threads, file)
     value = []
@@ -38,15 +55,15 @@ function run_one_bench(runs, threads, file)
         push!(times, r.times)
         push!(stats, r.stats)
     end
-    @printf("run time: %0.0fms min, %0.0fms max %0.0fms median\n",
-       minimum(times) / 1_000_000,
-       maximum(times) / 1_000_000,
-       median(times) / 1_000_000)
-    time = map(gctime, stats)
-    @printf("gc time: %0.0fms min, %0.0fms max, %0.0fms median\n",
-       minimum(time) / 1_000_000,
-       maximum(time) / 1_000_000,
-       median(time) / 1_000_000)
+    total_stats = get_stats(times) ./ 1_000_000
+    gc_stats = get_stats(map(stat->stat.total_time, stats)) ./ 1_000_000
+    pct_gc = get_stats(map((t,stat)->(stat.total_time/t), times, stats)) .* 100
+
+    header = (["", "total time", "gc time", "percent gc"], ["", "ms", "ms","%"])
+    labels = ["minimum", "median", "maximum"]
+    highlighters = Tuple(highlight_col(4, 10, 50))
+    data = hcat(labels, total_stats, gc_stats, pct_gc)
+    pretty_table(data; header, formatters=ft_printf("%0.0f"), highlighters)
 end
 
 function run_all_benches(runs, threads)
@@ -58,8 +75,8 @@ function run_all_benches(runs, threads)
             @show file
             run_one_bench(runs, threads, file)
         end
+        cd("..")
     end
-    cd("..")
 end
 
 function main()
@@ -79,4 +96,3 @@ function main()
 end
 
 main()
-
