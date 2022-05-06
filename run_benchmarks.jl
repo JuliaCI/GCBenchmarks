@@ -10,14 +10,14 @@ function parse_commandline()
 
     @add_arg_table! s begin
         "--runs", "-n"
-            help = "number of threads"
+            help = "number of iterations"
             arg_type = Int
             default = 10
         "--threads", "-t"
-            help = "another option with an argument"
+            help = "number of threads"
             arg_type = Int
             default = 1
-        "--bench"
+        "--bench", "-b"
             help = "if specified, runs a single benchmark"
             arg_type = String
             default = "all"
@@ -58,8 +58,8 @@ function run_all_benches(runs, threads)
             @show file
             run_one_bench(runs, threads, file)
         end
-    end
     cd("..")
+    end
 end
 
 function main()
