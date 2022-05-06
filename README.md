@@ -3,27 +3,37 @@
 This package contains various test programs which measure the efficiency of Garbage Collection (GC) in Julia.
 
 ## QuickStart
-You can run the entire benchmark suite by running
-julia run_benchmarks.jl <n>
-Where n defaults to 10 and is the number of times to run each program.
+You can run the entire benchmark suite by running `julia --project=. run_benchmarks.jl`
+You can also control the number of threads and/or the number of times each benchmark is run.
+For example, to run all the benchmarks 5 times with 4 threads,
+`julia --project=. run_benchmarks.jl --threads=4 --runs=5`
 
-You can run each benchmark individually by running
-julia run_one_benchmark.jl benches/linked/tree.jl <n>
-
+To run a benchmark individually (eg linked/tree.jl), run 
+`julia --project=. run_benchmarks.jl --bench=linked/tree.jl`
+which also accepts `--threads` and `--runs`.
 
 ## The benchmarks
 
 We expect the list of benchmarks to change over time, but for now we have the following.
 
-### append.jl
+
 ### pidigits.jl
 ### pollard.jl
+These test `BigInt` performance. `pidigits` tests large `BigInt` and `pollard` tests small `BigInt`.
+### append.jl
+This tests repeatedly growing `Vector`s.
 ### compiler_stresstest.jl
+This tests some aspects of codegen, but whether it's a good GC benchmark is very version specific.
 ### list.jl
 ### tree.jl
+These are tests of allocater performance for small pointer heavy data structures.
 ### strings.jl
 ### tree_immutable.jl (perfect binary tree)
 ### tree_mutable.jl (perfect binary tree)
+These test GC performance for small pointer heavy data structures with multiple threads.
+### timezones.jl
+This tests the creation of timezones which involve repeated short `String` allocations.
+
 
 ## The results
 
