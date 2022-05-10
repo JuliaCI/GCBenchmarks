@@ -1,5 +1,9 @@
 include("../../utils.jl")
 
+# This benchmark should demonstrate the issue with Time To SafePoint when
+# running some threads that allocate and some threads in heavy math code
+# that doesn't offer a safepoint.
+
 function work(i,j)
     out = 1
     for x in 1:i
@@ -43,8 +47,9 @@ function testhelper()
    y
 end
 
-function test() 
-  Threads.@threads for i in 1:10
+function test()
+  n = Threads.nthreads() * 2
+  Threads.@threads for i in 1:n
       testhelper()
    end
 end
