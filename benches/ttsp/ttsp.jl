@@ -31,7 +31,7 @@ function list(n=128)
     return current.key
 end
 
-# Allocate in a loop until anything is pushed into `signal` Channel.
+
 function allocate_in_background()
    list(32)
 end
