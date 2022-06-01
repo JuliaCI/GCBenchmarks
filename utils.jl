@@ -18,14 +18,16 @@ macro gctime(ex)
             result = (
                 value = val,
                 times = (end_time - start_time),
-                stats = Base.GC_Diff(end_gc_num, start_gc_num),
+                gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
+                gc_end = end_gc_num
             )
         catch e
             @show e
             result = (
                 value = e,
                 times = NaN,
-                stats = Base.GC_Diff(Base.gc_num(), start_gc_num),
+                gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
+                gc_end = end_gc_num
             )
         end
         "SERIALIZE" in ARGS ? serialize(stdout, result) : display(result)
