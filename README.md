@@ -28,8 +28,12 @@ This tests some aspects of codegen, but whether it's a good GC benchmark is very
 ### tree.jl
 These are tests of allocater performance for small pointer heavy data structures.
 ### strings.jl
+### tree_immutable.jl (perfect binary tree)
+### tree_mutable.jl (perfect binary tree)
+These test GC performance for small pointer heavy data structures with multiple threads.
 ### timezones.jl
 This tests the creation of timezones which involve repeated short `String` allocations.
+
 
 ## The results
 
