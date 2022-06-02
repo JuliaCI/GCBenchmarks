@@ -60,16 +60,18 @@ function run_one_bench(runs, threads, file)
     total_stats = get_stats(times) ./ 1_000_000
     gc_time = get_stats(map(stat->stat.total_time, gc_diff)) ./ 1_000_000
     max_pause = get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000
+    time_to_safepoint = get_stats(map(stat->stat.time_to_safepoint, gc_end)) ./ 1_000_000
     max_mem = get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2
     pct_gc = get_stats(map((t,stat)->(stat.total_time/t), times, gc_diff)) .* 100
 
-    header = (["", "total time", "gc time", "max GC pause", "max heap", "percent gc"],
-              ["", "ms",         "ms",       "ms",          "MB",       "%"        ])
+    header = (["", "total time", "gc time", "max GC pause", "time to safepoint", "max heap", "percent gc"],
+              ["", "ms",         "ms",       "ms",          "ms",                "MB",       "%"        ])
     labels = ["minimum", "median", "maximum"]
-    highlighters = highlight_col(4, 10, 100)
-    append!(highlighters, highlight_col(6, 10, 50))
+    highlighters = highlight_col(4, 10, 100) # max pause
+    append!(highlighters, highlight_col(5, 1, 10)) # time to safepoint 
+    append!(highlighters, highlight_col(7, 10, 50)) # pct gc
     highlighters = Tuple(highlighters)
-    data = hcat(labels, total_stats, gc_time, max_pause, max_mem, pct_gc)
+    data = hcat(labels, total_stats, gc_time, max_pause, time_to_safepoint, max_mem, pct_gc)
     pretty_table(data; header, formatters=ft_printf("%0.0f"), highlighters)
 end
 
