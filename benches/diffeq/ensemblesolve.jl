@@ -25,7 +25,7 @@ include("../../utils.jl")
 @gctime solve(ensemble_prob,SRIW1(),trajectories=1_000_000).u[end].u[end]
 
 
-# Results on Julia master with 18 threads at time of PR:
+#= Results on Julia master with 18 threads at time of PR:
 ┌─────────┬────────────┬─────────┬──────────────┬───────────────────┬──────────┬────────────┐
 │         │ total time │ gc time │ max GC pause │ time to safepoint │ max heap │ percent gc │
 │         │         ms │      ms │           ms │                ms │       MB │          % │
@@ -34,4 +34,4 @@ include("../../utils.jl")
 │  median │      44160 │   19057 │         9919 │                 0 │    34118 │         43 │
 │ maximum │      44429 │   19152 │         9948 │                 0 │    34202 │         43 │
 └─────────┴────────────┴─────────┴──────────────┴───────────────────┴──────────┴────────────┘
-
+=#
