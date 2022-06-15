@@ -51,7 +51,13 @@ function run_one_bench(runs, threads, file)
     gc_diff = []
     gc_end = []
     for _ in 1:runs
-        r = open(deserialize, `$JULIAVER --project=. --threads=$threads $file SERIALIZE`)
+        # uglyness to communicate over non stdout (specifically file descriptor 3)
+        p = Base.PipeEndpoint()
+        cmd = `$JULIAVER --project=. --threads=$threads $file SERIALIZE`
+        cmd = run(Base.CmdRedirect(cmd, p, 3), stdout, stderr, wait=false)
+        r = deserialize(p)
+        @assert success(cmd)
+        # end uglyness
         push!(value, r.value)
         push!(times, r.times)
         push!(gc_diff, r.gc_diff)
@@ -68,7 +74,7 @@ function run_one_bench(runs, threads, file)
               ["", "ms",         "ms",       "ms",          "ms",                "MB",       "%"        ])
     labels = ["minimum", "median", "maximum"]
     highlighters = highlight_col(4, 10, 100) # max pause
-    append!(highlighters, highlight_col(5, 1, 10)) # time to safepoint 
+    append!(highlighters, highlight_col(5, 1, 10)) # time to safepoint
     append!(highlighters, highlight_col(7, 10, 50)) # pct gc
     highlighters = Tuple(highlighters)
     data = hcat(labels, total_stats, gc_time, max_pause, time_to_safepoint, max_mem, pct_gc)

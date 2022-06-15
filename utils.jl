@@ -30,6 +30,11 @@ macro gctime(ex)
                 gc_end = end_gc_num
             )
         end
-        "SERIALIZE" in ARGS ? serialize(stdout, result) : display(result)
+        if "SERIALIZE" in ARGS
+            # uglyness to communicate over non stdout (specifically file descriptor 3)
+            serialize(open(RawFD(3)), result)
+        else
+            display(result)
+        end
     end
 end
