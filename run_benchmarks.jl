@@ -54,7 +54,7 @@ function run_one_bench(runs, threads, file)
         # uglyness to communicate over non stdout (specifically file descriptor 3)
         p = Base.PipeEndpoint()
         cmd = `$JULIAVER --project=. --threads=$threads $file SERIALIZE`
-        cmd = run(Base.CmdRedirect(cmd, p, 3), stdout, stderr, wait=false)
+        cmd = run(Base.CmdRedirect(cmd, p, 3), stdin, stdout, stderr, wait=false)
         r = deserialize(p)
         @assert success(cmd)
         # end uglyness
