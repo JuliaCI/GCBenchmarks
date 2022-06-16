@@ -64,7 +64,7 @@ function run_one_bench(runs, threads, file)
         push!(gc_end, r.gc_end)
     end
     total_stats = get_stats(times) ./ 1_000_000
-    gc_time = get_stats(map(stat->stat.total_time, gc_diff)) ./ 1_000_000
+    gc_time = get_stats(map(stat->stat.total_time, gc_end)) ./ 1_000_000
     max_pause = get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000
     time_to_safepoint = get_stats(map(stat->stat.time_to_safepoint, gc_end)) ./ 1_000_000
     max_mem = get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2
