@@ -66,12 +66,12 @@ function run_one_bench(runs, threads, file)
     total_stats = get_stats(times) ./ 1_000_000
     gc_time = get_stats(map(stat->stat.total_time, gc_end)) ./ 1_000_000
     max_pause = get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000
-    time_to_safepoint = get_stats(map(stat->stat.time_to_safepoint, gc_end)) ./ 1_000_000
+    time_to_safepoint = get_stats(map(stat->stat.time_to_safepoint, gc_end)) ./ 1_000
     max_mem = get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2
     pct_gc = get_stats(map((t,stat)->(stat.total_time/t), times, gc_diff)) .* 100
 
     header = (["", "total time", "gc time", "max GC pause", "time to safepoint", "max heap", "percent gc"],
-              ["", "ms",         "ms",       "ms",          "ms",                "MB",       "%"        ])
+              ["", "ms",         "ms",       "ms",          "us",                "MB",       "%"        ])
     labels = ["minimum", "median", "maximum"]
     highlighters = highlight_col(4, 10, 100) # max pause
     append!(highlighters, highlight_col(5, 1, 10)) # time to safepoint
