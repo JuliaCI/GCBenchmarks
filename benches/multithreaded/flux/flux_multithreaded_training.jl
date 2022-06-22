@@ -1,4 +1,5 @@
-include("../../utils.jl")
+include(joinpath("..", "..", "..", "utils.jl"))
+
 using Flux, Printf, Statistics
 
 # Simple model

@@ -1,0 +1,9 @@
+# Temporary
+*.DS_Store
+*.swp
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+*~
+TAGS
+Manifest.toml

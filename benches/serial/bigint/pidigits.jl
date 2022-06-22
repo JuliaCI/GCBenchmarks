@@ -1,4 +1,5 @@
-include("../../utils.jl")
+include(joinpath("..", "..", "..", "utils.jl"))
+
 # The Computer Language Benchmarks Game
 # https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 

@@ -1,4 +1,5 @@
-include("../../utils.jl")
+include(joinpath("..", "..", "..", "utils.jl"))
+
 using Random
 
 # This program generates random length strings made up of ACTG characters.

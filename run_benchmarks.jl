@@ -1,31 +1,24 @@
-using Statistics
-using Serialization
-using Printf
-using ArgParse
+const doc = """run_benchmarks.jl -- GC benchmarks test harness
+Usage:
+    run_benchmarks.jl (serial|multithreaded|slow) (all|<category> [<name>]) [options]
+    run_benchmarks.jl -h | --help
+    run_benchmarks.jl --version
+Options:
+    -n <runs>, --runs=<runs>              Number of runs for each benchmark [default: 10].
+    -t <threads>, --threads=<threads>     Number of threads to use [default: 1].
+    -s <max>, --scale=<max>               Maximum number of threads for scaling test.
+    -h, --help                            Show this screen.
+    --version                             Show version.
+"""
+
+using DocOpt
 using PrettyTables
+using Printf
+using Serialization
+using Statistics
 
+const args = docopt(doc, version = v"0.1.1")
 const JULIAVER = Base.julia_cmd()[1]
-
-function parse_commandline()
-    s = ArgParseSettings()
-
-    @add_arg_table! s begin
-        "--runs", "-n"
-            help = "number of iterations"
-            arg_type = Int
-            default = 10
-        "--threads", "-t"
-            help = "number of threads"
-            arg_type = Int
-            default = 1
-        "--bench", "-b"
-            help = "if specified, runs a single benchmark"
-            arg_type = String
-            default = "all"
-    end
-
-    return parse_args(s)
-end
 
 # times in ns
 # TODO: get better stats
@@ -45,7 +38,7 @@ function highlight_col(col, lo, hi)
      Highlighter((data,i,j) -> (j == col) && hi <= data[i, j]; foreground=:red),]
 end
 
-function run_one_bench(runs, threads, file)
+function run_bench(runs, threads, file)
     value = []
     times = []
     gc_diff = []
@@ -81,33 +74,65 @@ function run_one_bench(runs, threads, file)
     pretty_table(data; header, formatters=ft_printf("%0.0f"), highlighters)
 end
 
-function run_all_benches(runs, threads)
+function run_category_files(benches, args)
+    local runs = parse(Int, args["--runs"])
+    local threads = parse(Int, args["--threads"])
+    local max = if isnothing(args["--scale"]) 0 else parse(Int, args["--scale"]) end
+    for bench in benches
+        @show bench
+        if isnothing(args["--scale"])
+            run_bench(runs, threads, bench)
+        else
+            local n = 0
+            while true
+                threads = 2^n
+                threads > max && break
+                @show threads
+                run_bench(runs, threads, bench)
+                n += 1
+            end
+        end
+    end
+end
+
+function run_all_categories(args)
     for category in readdir()
         @show category
         cd(category)
-        for file in readdir()
-            endswith(file, ".jl") || continue
-            @show file
-            run_one_bench(runs, threads, file)
-        end
+        benches = filter(f -> endswith(f, ".jl"), readdir())
+        run_category_files(benches, args)
         cd("..")
     end
 end
 
-function main()
-    args = parse_commandline()
-    JULIAVER = Base.julia_cmd()[1]
-    bench, runs, threads = args["bench"], args["runs"], args["threads"]
+function main(args)
+    cd(joinpath(@__DIR__, "benches"))
 
-    dir = joinpath(@__DIR__, "benches")
-    cd(dir)
-    if bench == "all"
-        run_all_benches(runs, threads)
+    # validate choices
+    if !isnothing(args["--scale"])
+        @assert args["--threads"] == "1" "Specify either --scale or --threads."
+    end
+
+    # select benchmark class
+    if args["serial"]
+        cd("serial")
+    elseif args["multithreaded"]
+        cd("multithreaded")
+    else # args["slow"]
+        cd("slow")
+    end
+
+    if args["all"]
+        run_all_categories(args)
     else
-        path, file = splitpath(bench)
-        cd(path)
-        run_one_bench(runs, threads, file)
+        cd(args["<category>"])
+        benches = if isnothing(args["<name>"])
+            filter(f -> endswith(f, ".jl"), readdir())
+        else
+            ["$(args["<name>"]).jl"]
+        end
+        run_category_files(benches, args)
     end
 end
 
-main()
+main(args)
