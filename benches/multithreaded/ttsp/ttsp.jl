@@ -1,4 +1,4 @@
-include("../../utils.jl")
+include(joinpath("..", "..", "..", "utils.jl"))
 
 # This benchmark should demonstrate the issue with Time To SafePoint when
 # running some threads that allocate and some threads in heavy math code

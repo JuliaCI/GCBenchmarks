@@ -1,3 +1,5 @@
+include(joinpath("..", "..", "..", "utils.jl"))
+
 using DifferentialEquations
 
 function f(du,u,p,t)
@@ -19,8 +21,6 @@ function prob_func(prob,i,repeat)
 end
 
 ensemble_prob = EnsembleProblem(prob,prob_func=prob_func);
-
-include("../../utils.jl")
 
 @gctime solve(ensemble_prob,SRIW1(),trajectories=1_000_000).u[end].u[end]
 

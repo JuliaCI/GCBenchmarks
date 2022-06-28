@@ -1,3 +1,5 @@
+include(joinpath("..", "..", "..", "utils.jl"))
+
 module BinaryTreeMutable
 
 # Adopted from
@@ -44,8 +46,6 @@ function binary_trees(io, n::Int)
 end
 
 end #module
-
-include("../../utils.jl")
 
 using .BinaryTreeMutable
 

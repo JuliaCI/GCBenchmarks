@@ -1,4 +1,5 @@
-include("../../utils.jl")
+include(joinpath("..", "..", "..", "utils.jl"))
+
 using Random
 
 mutable struct TreeNode
