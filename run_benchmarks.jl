@@ -23,7 +23,7 @@ const JULIAVER = Base.julia_cmd()[1]
 # times in ns
 # TODO: get better stats
 function get_stats(times::Vector)
-    return [minimum(times), median(times), maximum(times)]
+    return [minimum(times), median(times), maximum(times), std(times)]
 end
 
 """
@@ -59,7 +59,7 @@ function run_bench(runs, threads, file)
     total_stats = get_stats(times) ./ 1_000_000
     gc_time = get_stats(map(stat->stat.total_time, gc_end)) ./ 1_000_000
     mark_time = get_stats(map(stat->stat.mark_time, gc_end)) ./ 1_000_000
-    sweep_time = get_stats(map(stat->stat.sweep_time, gc_end)) ./ 1_000_000    
+    sweep_time = get_stats(map(stat->stat.sweep_time, gc_end)) ./ 1_000_000
     max_pause = get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000
     time_to_safepoint = get_stats(map(stat->stat.time_to_safepoint, gc_end)) ./ 1_000
     max_mem = get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2
@@ -67,7 +67,7 @@ function run_bench(runs, threads, file)
 
     header = (["", "total time", "gc time", "mark time", "sweep time", "max GC pause", "time to safepoint", "max heap", "percent gc"],
               ["", "ms",         "ms",       "ms",          "ms",       "ms",          "us",                "MB",       "%"        ])
-    labels = ["minimum", "median", "maximum"]
+    labels = ["minimum", "median", "maximum", "stdev"]
     highlighters = highlight_col(4, 10, 100) # max pause
     append!(highlighters, highlight_col(5, 1, 10)) # time to safepoint
     append!(highlighters, highlight_col(7, 10, 50)) # pct gc
