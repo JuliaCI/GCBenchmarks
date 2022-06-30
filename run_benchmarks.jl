@@ -58,8 +58,8 @@ function run_bench(runs, threads, file)
     end
     total_stats = get_stats(times) ./ 1_000_000
     gc_time = get_stats(map(stat->stat.total_time, gc_end)) ./ 1_000_000
-    mark_time = get_stats(map(stat->stat.mark_time, gc_end)) ./ 1_000_000
-    sweep_time = get_stats(map(stat->stat.sweep_time, gc_end)) ./ 1_000_000    
+    mark_time = get_stats(map(stat->stat.total_mark_time, gc_end)) ./ 1_000_000
+    sweep_time = get_stats(map(stat->stat.total_sweep_time, gc_end)) ./ 1_000_000
     max_pause = get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000
     time_to_safepoint = get_stats(map(stat->stat.time_to_safepoint, gc_end)) ./ 1_000
     max_mem = get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2
