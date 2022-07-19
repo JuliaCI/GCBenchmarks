@@ -1,45 +1,59 @@
 # Garbage Collection Test Suite
 
-This package contains various test programs which measure the efficiency of Garbage Collection (GC) in Julia.
+This package contains various test programs which measure the efficiency of Garbage
+Collection (GC) in Julia.
 
-## QuickStart
-You can run the entire benchmark suite by running `julia --project=. run_benchmarks.jl`
-You can also control the number of threads and/or the number of times each benchmark is run.
-For example, to run all the benchmarks 5 times with 4 threads,
-`julia --project=. run_benchmarks.jl --threads=4 --runs=5`
+## Running
 
-To run a benchmark individually (eg linked/tree.jl), run 
-`julia --project=. run_benchmarks.jl --bench=linked/tree.jl`
-which also accepts `--threads` and `--runs`.
+```
+Usage:
+    run_benchmarks.jl (serial|multithreaded|slow) (all|<category> [<name>]) [options]
+    run_benchmarks.jl -h | --help
+    run_benchmarks.jl --version
+Options:
+    -n <runs>, --runs=<runs>              Number of runs for each benchmark [default: 10].
+    -t <threads>, --threads=<threads>     Number of threads to use [default: 1].
+    -s <max>, --scale=<max>               Maximum number of threads for scaling test.
+    -h, --help                            Show this screen.
+    --version                             Show version.
+```
+
+## Classes
+
+There are three classes of benchmarks:
+- *Serial* benchmarks do not use threads. The `--threads` and `--scale` options are only
+  useful if testing multithreaded GC.
+- *Multithreaded* benchmarks do use threads.
+- *Slow* benchmarks are long-running in comparison with the other two classes.
+
+## Examples
+
+- Run all serial benchmarks 5 times each using 1 thread:
+
+  `julia --project=. run_benchmarks.jl serial all -n 5`
+
+- Run the binary tree benchmarks 10 times each with 1, 2, 4 and 8 threads:
+
+  `julia --project=. run_benchmarks.jl multithreaded binary_tree -s 8`
+
+- Run the red-black tree benchmark once using 1 thread:
+
+  `julia --project=. run_benchmarks.jl slow rb_tree rb_tree -n 1`
 
 ## The benchmarks
 
-We expect the list of benchmarks to change over time, but for now we have the following.
-
-
-### pidigits.jl
-### pollard.jl
-These test `BigInt` performance. `pidigits` tests large `BigInt` and `pollard` tests small `BigInt`.
-### append.jl
-This tests repeatedly growing `Vector`s.
-### compiler_stresstest.jl
-This tests some aspects of codegen, but whether it's a good GC benchmark is very version specific.
-### list.jl
-### tree.jl
-These are tests of allocater performance for small pointer heavy data structures.
-### strings.jl
-### tree_immutable.jl (perfect binary tree)
-### tree_mutable.jl (perfect binary tree)
-These test GC performance for small pointer heavy data structures with multiple threads.
-### timezones.jl
-This tests the creation of timezones which involve repeated short `String` allocations.
-
-
-## The results
-
-We expect to add more results including max memory used but for now we report max, min, median end to end runtime and max, min, median gc time for each benchmark.
-
-test = "append.jl"
-run time: 193908s min, 193921s max 193915s median
-gc time: 17ms min, 620ms max, 323ms median
-
+| Class | Category | Name | Description |
+| ---   | ---      | ---  | ---         |
+| Serial | TimeZones | TimeZones.jl | Creation of timezones which involve repeated short `String` allocations. |
+|        | append | append.jl | Repeatedly growing `Vector`s. |
+|        | bigint | pidigits.jl | Tests large `BigInt`s. |
+|        |        | pollard.jl | Tests small `BigInt`s. |
+|        | linked | list.jl | Small pointer-heavy data structure. |
+|        |        | tree.jl | Small pointer-heavy data structure. |
+|        | strings | strings.jl | |
+| Multithreaded | binary_tree | tree_immutable.jl | Small pointer-heavy data structure. |
+|               |             | tree_mutable.jl | Small pointer-heavy data structure. |
+|               | flux | flux_multithreaded_training.jl | |
+|               | ttsp | ttsp.jl | Time-to-safepoint. |
+| Slow | rb\_tree | rb\_tree.jl | Pointer graph whose minimum linear arrangement has cost Θ(n²). |
+|      | diffeq | ensemblesolve.jl | |
