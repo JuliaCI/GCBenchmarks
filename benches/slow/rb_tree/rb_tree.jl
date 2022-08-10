@@ -66,7 +66,9 @@ struct PointByY
 end
 Base.isless(a::PointByY, b::PointByY) = isless(a.p.y, b.p.y)
 
-function tvbench(N::Int, min_seconds)
+function tvbench(; N = 100_000_000, min_seconds = 0, max_seconds = 600)
+    @assert min_seconds <= max_seconds
+
     t0 = time()
     queue = Queue{Point}()
     xtree = RBTree{PointByX}()
@@ -109,10 +111,10 @@ function tvbench(N::Int, min_seconds)
             @timev GC.gc()
         end
         elapsed = time() - t0
-        if (count >= N) && (elapsed > min_seconds)
+        if (elapsed >= min_seconds) && ((count >= N) || (elapsed >= max_seconds))
             break
         end
     end
 end
 
-@gctime tvbench(100_000_000, 1200)
+@gctime tvbench()
