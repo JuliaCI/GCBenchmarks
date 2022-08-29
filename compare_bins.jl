@@ -28,13 +28,13 @@ function main(args)
     header = ["", f1, f2]
 
     # show medians
-    raw_data = [js1["total time"][1] js2["total time"][2];
-                js1["gc time"][1] js2["gc time"][2];
-                js1["mark time"][1] js2["mark time"][2];
-                js1["sweep time"][1] js2["sweep time"][2];
-                js1["max pause"][1] js2["max pause"][2];
-                js1["max memory"][1] js2["max memory"][2];
-                js1["pct gc"][1] js2["pct gc"][2]]
+    raw_data = [js1["total time"][2] js2["total time"][2];
+                js1["gc time"][2] js2["gc time"][2];
+                js1["mark time"][2] js2["mark time"][2];
+                js1["sweep time"][2] js2["sweep time"][2];
+                js1["max pause"][2] js2["max pause"][2];
+                js1["max memory"][2] js2["max memory"][2];
+                js1["pct gc"][2] js2["pct gc"][2]]
 
     data = hcat(labels, raw_data)
     pretty_table(data, header, formatters=ft_printf("%0.0f"))
