@@ -13,9 +13,9 @@ Options:
 """
 
 using DocOpt
+using JSON
 using PrettyTables
 using Printf
-using JSON
 using Serialization
 using Statistics
 
@@ -95,7 +95,9 @@ function run_category_files(benches, args, show_json = false)
     local threads = parse(Int, args["--threads"])
     local max = if isnothing(args["--scale"]) 0 else parse(Int, args["--scale"]) end
     for bench in benches
-        @show bench
+        if !show_json
+            @show bench
+        end
         if isnothing(args["--scale"])
             run_bench(runs, threads, bench, show_json)
         else
