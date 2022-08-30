@@ -140,7 +140,7 @@ function main(args)
         cd("slow")
     end
 
-    show_json = !isnothing(args["--json"])
+    show_json = args["--json"]
 
     if args["all"]
         run_all_categories(args, show_json)
