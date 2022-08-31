@@ -25,7 +25,6 @@ function main(args)
         # using medians
         total_time = js["total time"][2]
         gc_time = js["gc time"][2]
-
         mdcs[file] = total_time - gc_time
     end
 
@@ -35,8 +34,6 @@ function main(args)
         js = JSON.parsefile(file)
         # using medians
         total_time = js["total time"][2]
-        gc_time = js["gc time"][2]
-
         lbos[file] = total_time - mdc
     end
 
