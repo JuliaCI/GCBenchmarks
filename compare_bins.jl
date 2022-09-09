@@ -18,12 +18,12 @@ function main(args)
     js1 = JSON.parsefile(f1)
     js2 = JSON.parsefile(f2)
 
-    labels = ["total time ",
-              "gc time ",
-              "mark time",
-              "sweep time",
-              "max pause",
-              "max memory",
+    labels = ["total time [ms]",
+              "gc time [ms]",
+              "mark time [ms]",
+              "sweep time [ms]",
+              "max pause [ms]",
+              "max memory [MB]",
               "pct gc"]
     header = ["", f1, f2]
 
@@ -37,7 +37,7 @@ function main(args)
                 js1["pct gc"][2] js2["pct gc"][2]]
 
     data = hcat(labels, raw_data)
-    pretty_table(data, header, formatters=ft_printf("%0.0f"))
+    pretty_table(data; header, formatters=ft_printf("%0.0f"))
 end
 
 main(args)
