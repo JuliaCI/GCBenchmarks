@@ -13,6 +13,7 @@ using Printf
 
 const args = docopt(doc, version = v"0.1.1")
 
+const NRUNS = 10
 const EVENT_INDEX = 4
 const FUNC_NAME_INDEX = 7
 
@@ -43,7 +44,7 @@ event_list = ["cycles", "instructions", "cache-misses", "page-faults"]
 
 function run_benchmark(bin_list, f)
     if !Sys.islinux()
-        error("Measurement infrastructure is `only available on linux")
+        error("Measurement infrastructure is only available on linux")
     end
 
     # Initialize event count tables
@@ -63,9 +64,9 @@ function run_benchmark(bin_list, f)
         Printf.@printf "Running %s on %s\n" f_split[5] bin
         for event in event_list
             Printf.@printf "Measuring %s\n" event
-            run(pipeline(`perf record -e $event $bin run_benchmarks.jl $directory $category $file_name`, stdout = devnull, stderr = devnull))
+            run(pipeline(`perf record -e $event $bin run_benchmarks.jl $directory $category $file_name -n$NRUNS`, stdout = devnull, stderr = devnull))
             run(pipeline(`perf script`, stdout = "out"))
-            gc_event_count, total_event_count = parse_event_table("out")
+            gc_event_count, total_event_count = parse_event_table("out") ./ NRUNS
             push!(gc_event_counts[event], gc_event_count)
             push!(total_event_counts[event], total_event_count)
         end
