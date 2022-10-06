@@ -21,7 +21,7 @@ long perf_event_start(void)
 
    int fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
    if (fd == -1) {
-      fprintf(stderr, "Error opening leader\n", pe.config);
+      fprintf(stderr, "Error opening perf event\n");
       exit(1);
    }
 

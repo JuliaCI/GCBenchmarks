@@ -11,7 +11,7 @@ function gc_cb_pre()
 end
 
 function gc_cb_post()
-    cycles_in_gc[] += ccall((:perf_event_start, "lib_gc_benchmarks.so"), Clonglong, (Cint,), (perf_fd[],))
+    cycles_in_gc[] += ccall((:perf_event_end, "lib_gc_benchmarks.so"), Clonglong, (Cint,), (perf_fd[],))
     nothing
 end
 
@@ -20,10 +20,10 @@ macro gctime(ex)
         :(Base.Experimental.@force_compile) :
         :()
     quote
-        ccall(:jl_gc_set_cb_pre_gc, Cvoid, (Ptr{Cvoid}, Cint),
-              @cfunction(gc_cb_pre, Cvoid, (Cint,)), true)
-        ccall(:jl_gc_set_cb_post_gc, Cvoid, (Ptr{Cvoid}, Cint),
-              @cfunction(gc_cb_post, Cvoid, (Cint,)), true)
+        # ccall(:jl_gc_set_cb_pre_gc, Cvoid, (Ptr{Cvoid}, Cint),
+        #      @cfunction(gc_cb_pre, Cvoid, (Cint,)), true)
+        # ccall(:jl_gc_set_cb_post_gc, Cvoid, (Ptr{Cvoid}, Cint),
+        #      @cfunction(gc_cb_post, Cvoid, (Cint,)), true)
         $fc
         local result
         try
@@ -32,13 +32,12 @@ macro gctime(ex)
             local val = $(esc(ex))
             local end_time = time_ns()
             local end_gc_num = Base.gc_num()
-            local cycles_in_gc = cycles_in_gc[]
             result = (
                 value = val,
                 times = (end_time - start_time),
                 gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
                 gc_end = end_gc_num,
-                cycles_in_gc = cycles_in_gc,
+                cycles_in_gc = cycles_in_gc[],
             )
         catch e
             @show e
