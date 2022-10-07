@@ -17,8 +17,6 @@ function gc_cb_post(full::Cint)
     nothing
 end
 
-perf_fd[] = ccall((:perf_event_start, GC_LIB), Clong, ())
-
 macro gctime(ex)
     fc = isdefined(Base.Experimental, Symbol("@force_compile")) ?
         :(Base.Experimental.@force_compile) :
@@ -26,16 +24,19 @@ macro gctime(ex)
     quote
         $fc
         local result
-        ccall(:jl_gc_set_cb_pre_gc, Cvoid, (Ptr{Cvoid}, Cint),
-              @cfunction(gc_cb_pre, Cvoid, (Cint,)), true)
-        ccall(:jl_gc_set_cb_post_gc, Cvoid, (Ptr{Cvoid}, Cint),
-              @cfunction(gc_cb_post, Cvoid, (Cint,)), true)
         try
             local start_gc_num = Base.gc_num()
             local start_time = time_ns()
             local val = $(esc(ex))
             local end_time = time_ns()
             local end_gc_num = Base.gc_num()
+            # Re-run with `perf` callbacks turned on
+            perf_fd[] = ccall((:perf_event_start, GC_LIB), Clong, ())
+            ccall(:jl_gc_set_cb_pre_gc, Cvoid, (Ptr{Cvoid}, Cint),
+                  @cfunction(gc_cb_pre, Cvoid, (Cint,)), true)
+            ccall(:jl_gc_set_cb_post_gc, Cvoid, (Ptr{Cvoid}, Cint),
+                  @cfunction(gc_cb_post, Cvoid, (Cint,)), true)
+            $(esc(ex))
             result = (
                 value = val,
                 times = (end_time - start_time),

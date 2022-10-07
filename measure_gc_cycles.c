@@ -23,8 +23,8 @@ long perf_event_start()
 
     int fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
     if (fd == -1) {
-      fprintf(stderr, "Error opening perf event\n");
-      exit(1);
+        fprintf(stderr, "Error opening perf event\n");
+        exit(1);
     }
 
     perf_event_reset();
