@@ -3,7 +3,7 @@ Pkg.instantiate() # It is dumb that I have to do this
 using Serialization
 
 const perf_fd = Ref(Int64(0))
-const cycles_in_gc = Ref(Int128(0))
+const gc_cycles = Ref(Int128(0))
 
 const GC_LIB = "../../../gc_benchmarks.so"
 
@@ -13,7 +13,7 @@ function gc_cb_pre(full::Cint)
 end
 
 function gc_cb_post(full::Cint)
-    cycles_in_gc[] += ccall((:perf_event_count, GC_LIB), Clonglong, (Clong,), perf_fd[])
+    gc_cycles[] += ccall((:perf_event_count, GC_LIB), Clonglong, (Clong,), perf_fd[])
     nothing
 end
 
@@ -41,7 +41,7 @@ macro gctime(ex)
                 times = (end_time - start_time),
                 gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
                 gc_end = end_gc_num,
-                cycles_in_gc = cycles_in_gc[],
+                gc_cycles = gc_cycles[],
             )
         catch e
             @show e

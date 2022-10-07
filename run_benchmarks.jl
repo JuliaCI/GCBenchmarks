@@ -45,6 +45,7 @@ function run_bench(runs, threads, file, show_json = false)
     times = []
     gc_diff = []
     gc_end = []
+    gc_cycles = []
     for _ in 1:runs
         # uglyness to communicate over non stdout (specifically file descriptor 3)
         p = Base.PipeEndpoint()
@@ -57,9 +58,11 @@ function run_bench(runs, threads, file, show_json = false)
         push!(times, r.times)
         push!(gc_diff, r.gc_diff)
         push!(gc_end, r.gc_end)
+        push!(gc_cycles, r.gc_cycles)
     end
     total_stats = get_stats(times) ./ 1_000_000
     gc_time = get_stats(map(stat->stat.total_time, gc_end)) ./ 1_000_000
+    gc_cycles = get_stats(gc_cycles) ./ 1_000_000
     mark_time = get_stats(map(stat->stat.total_mark_time, gc_end)) ./ 1_000_000
     sweep_time = get_stats(map(stat->stat.total_sweep_time, gc_end)) ./ 1_000_000
     max_pause = get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000
@@ -67,8 +70,8 @@ function run_bench(runs, threads, file, show_json = false)
     max_mem = get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2
     pct_gc = get_stats(map((t,stat)->(stat.total_time/t), times, gc_diff)) .* 100
 
-    header = (["", "total time", "gc time", "mark time", "sweep time", "max GC pause", "time to safepoint", "max heap", "percent gc"],
-              ["", "ms",         "ms",       "ms",          "ms",       "ms",          "us",                "MB",       "%"        ])
+    header = (["", "total time", "gc time", "cycles in gc", "mark time", "sweep time", "max GC pause", "time to safepoint", "max heap", "percent gc"],
+              ["", "ms",         "ms",      "1e6"         , "ms"       ,  "ms",       "ms",          "us",                "MB",       "%"        ])
     labels = ["minimum", "median", "maximum"]
     highlighters = highlight_col(4, 10, 100) # max pause
     append!(highlighters, highlight_col(5, 1, 10)) # time to safepoint
@@ -85,7 +88,7 @@ function run_bench(runs, threads, file, show_json = false)
                      ("pct gc", pct_gc)])
         JSON.print(data)
     else
-        data = hcat(labels, total_stats, gc_time, mark_time, sweep_time, max_pause, time_to_safepoint, max_mem, pct_gc)
+        data = hcat(labels, total_stats, gc_time, gc_cycles, mark_time, sweep_time, max_pause, time_to_safepoint, max_mem, pct_gc)
         pretty_table(data; header, formatters=ft_printf("%0.0f"), highlighters)
     end
 end

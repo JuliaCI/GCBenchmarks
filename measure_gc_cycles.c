@@ -16,7 +16,7 @@ long perf_event_start()
     memset(&pe, 0, sizeof(pe));
     pe.type = PERF_TYPE_HARDWARE;
     pe.size = sizeof(pe);
-    pe.config = PERF_COUNT_HW_INSTRUCTIONS;
+    pe.config = PERF_COUNT_HW_CPU_CYCLES;
     pe.disabled = 1;
     pe.exclude_kernel = 1;
     pe.exclude_hv = 1;
