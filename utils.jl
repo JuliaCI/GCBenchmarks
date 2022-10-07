@@ -8,14 +8,16 @@ const cycles_in_gc = Ref(Int128(0))
 const GC_LIB = "../../../gc_benchmarks.so"
 
 function gc_cb_pre(full::Cint)
-    perf_fc[] = ccall((:perf_event_start, GC_LIB), Int64, ())
+    ccall((:perf_event_reset, GC_LIB), Cvoid, (Clong,), perf_fd[])
     nothing
 end
 
 function gc_cb_post(full::Cint)
-    cycles_in_gc[] += ccall((:perf_event_end, GC_LIB), Clonglong, (Cint,), (perf_fd[],))
+    cycles_in_gc[] += ccall((:perf_event_count, GC_LIB), Clonglong, (Clong,), perf_fd[])
     nothing
 end
+
+perf_fd[] = ccall((:perf_event_start, GC_LIB), Clong, ())
 
 macro gctime(ex)
     fc = isdefined(Base.Experimental, Symbol("@force_compile")) ?
@@ -34,7 +36,6 @@ macro gctime(ex)
             local val = $(esc(ex))
             local end_time = time_ns()
             local end_gc_num = Base.gc_num()
-            @show cycles_in_gc[]
             result = (
                 value = val,
                 times = (end_time - start_time),
