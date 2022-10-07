@@ -8,7 +8,7 @@
 #include <linux/perf_event.h>
 #include <asm/unistd.h>
 
-long perf_event_start(void)
+long perf_event_start()
 {
    struct perf_event_attr pe;
    memset(&pe, 0, sizeof(pe));
@@ -31,7 +31,7 @@ long perf_event_start(void)
    return fd;
 }
 
-long perf_event_end(int fd)
+long perf_event_end(long fd)
 {
    long long count;
    ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
