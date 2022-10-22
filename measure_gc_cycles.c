@@ -50,5 +50,5 @@ void perf_event_count(long fd)
 
 long perf_event_get_count()
 {
- return total_count;
+    return total_count;
 }

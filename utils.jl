@@ -3,11 +3,9 @@ Pkg.instantiate() # It is dumb that I have to do this
 using Libdl
 using Serialization
 
-const perf_fd = Ref(Int64(0))
-const gc_cycles = Ref(Int128(0))
-
 const GC_LIB = "../../../gc_benchmarks.so"
 lib = Libdl.dlopen(GC_LIB)
+sym_start = Libdl.dlsym(lib, :perf_event_start)
 sym_reset = Libdl.dlsym(lib, :perf_event_reset)
 sym_count = Libdl.dlsym(lib, :perf_event_count)
 sym_get_count = Libdl.dlsym(lib, :perf_event_get_count)
@@ -26,7 +24,7 @@ macro gctime(ex)
             local end_time = time_ns()
             local end_gc_num = Base.gc_num()
             # Re-run with `perf` callbacks turned on
-            ccall((:perf_event_start, GC_LIB), Cvoid, ())
+            ccall(sym_start, Cvoid, ())
             ccall(:jl_gc_set_cb_pre_gc, Cvoid, (Ptr{Cvoid}, Cint),
                   sym_reset, true)
             ccall(:jl_gc_set_cb_post_gc, Cvoid, (Ptr{Cvoid}, Cint),
