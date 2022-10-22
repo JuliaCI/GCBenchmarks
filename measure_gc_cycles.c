@@ -8,9 +8,12 @@
 #include <linux/perf_event.h>
 #include <asm/unistd.h>
 
+long long total_count = 0;
+int fd = 0;
+
 void perf_event_reset();
 
-long perf_event_start()
+void perf_event_start()
 {
     struct perf_event_attr pe;
     memset(&pe, 0, sizeof(pe));
@@ -21,15 +24,13 @@ long perf_event_start()
     pe.exclude_kernel = 1;
     pe.exclude_hv = 1;
 
-    int fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
+    fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
     if (fd == -1) {
         fprintf(stderr, "Error opening perf event\n");
         exit(1);
     }
 
     perf_event_reset();
-
-    return fd;
 }
 
 void perf_event_reset(long fd)
@@ -39,10 +40,15 @@ void perf_event_reset(long fd)
 }
 
 
-long perf_event_count(long fd)
+void perf_event_count(long fd)
 {
     long long count;
     ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
     read(fd, &count, sizeof(count));
-    return count;
+    total_count += count;
+}
+
+long perf_event_get_count()
+{
+ return total_count;
 }

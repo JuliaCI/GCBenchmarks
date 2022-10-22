@@ -1,21 +1,16 @@
 using Pkg
 Pkg.instantiate() # It is dumb that I have to do this
+using Libdl
 using Serialization
 
 const perf_fd = Ref(Int64(0))
 const gc_cycles = Ref(Int128(0))
 
 const GC_LIB = "../../../gc_benchmarks.so"
-
-function gc_cb_pre(full::Cint)
-    ccall((:perf_event_reset, GC_LIB), Cvoid, (Clong,), perf_fd[])
-    nothing
-end
-
-function gc_cb_post(full::Cint)
-    gc_cycles[] += ccall((:perf_event_count, GC_LIB), Clonglong, (Clong,), perf_fd[])
-    nothing
-end
+lib = Libdl.dlopen(GC_LIB)
+sym_reset = Libdl.dlsym(lib, :perf_event_reset)
+sym_count = Libdl.dlsym(lib, :perf_event_count)
+sym_get_count = Libdl.dlsym(lib, :perf_event_get_count)
 
 macro gctime(ex)
     fc = isdefined(Base.Experimental, Symbol("@force_compile")) ?
@@ -31,18 +26,18 @@ macro gctime(ex)
             local end_time = time_ns()
             local end_gc_num = Base.gc_num()
             # Re-run with `perf` callbacks turned on
-            perf_fd[] = ccall((:perf_event_start, GC_LIB), Clong, ())
+            ccall((:perf_event_start, GC_LIB), Cvoid, ())
             ccall(:jl_gc_set_cb_pre_gc, Cvoid, (Ptr{Cvoid}, Cint),
-                  @cfunction(gc_cb_pre, Cvoid, (Cint,)), true)
+                  sym_reset, true)
             ccall(:jl_gc_set_cb_post_gc, Cvoid, (Ptr{Cvoid}, Cint),
-                  @cfunction(gc_cb_post, Cvoid, (Cint,)), true)
+                  sym_count, true)
             $(esc(ex))
             result = (
                 value = val,
                 times = (end_time - start_time),
                 gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
                 gc_end = end_gc_num,
-                gc_cycles = gc_cycles[],
+                gc_cycles = ccall(sym_get_count, Clong, ()),
             )
         catch e
             @show e
