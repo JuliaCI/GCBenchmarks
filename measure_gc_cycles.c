@@ -9,7 +9,7 @@
 #include <asm/unistd.h>
 
 long long total_count = 0;
-int fd = 0;
+long fd = 0;
 
 void perf_event_reset();
 
@@ -33,14 +33,14 @@ void perf_event_start()
     perf_event_reset();
 }
 
-void perf_event_reset(long fd)
+void perf_event_reset()
 {
     ioctl(fd, PERF_EVENT_IOC_RESET, 0);
     ioctl(fd, PERF_EVENT_IOC_ENABLE, 0);
 }
 
 
-void perf_event_count(long fd)
+void perf_event_count()
 {
     long long count;
     ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
@@ -48,7 +48,7 @@ void perf_event_count(long fd)
     total_count += count;
 }
 
-long perf_event_get_count()
+long long perf_event_get_count()
 {
     return total_count;
 }

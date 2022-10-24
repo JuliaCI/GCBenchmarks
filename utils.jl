@@ -35,7 +35,7 @@ macro gctime(ex)
                 times = (end_time - start_time),
                 gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
                 gc_end = end_gc_num,
-                gc_cycles = ccall(sym_get_count, Clong, ()),
+                gc_cycles = ccall(sym_get_count, Clonglong, ()),
             )
         catch e
             @show e
@@ -44,7 +44,7 @@ macro gctime(ex)
                 times = NaN,
                 gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
                 gc_end = end_gc_num,
-                cycles_in_gc = NaN,
+                gc_cycles = NaN,
             )
         end
         if "SERIALIZE" in ARGS
