@@ -4,11 +4,13 @@ using Libdl
 using Serialization
 
 const GC_LIB = "../../../gc_benchmarks.so"
-lib = Libdl.dlopen(GC_LIB)
-sym_start = Libdl.dlsym(lib, :perf_event_start)
-sym_reset = Libdl.dlsym(lib, :perf_event_reset)
-sym_count = Libdl.dlsym(lib, :perf_event_count)
-sym_get_count = Libdl.dlsym(lib, :perf_event_get_count)
+const lib = Libdl.dlopen(GC_LIB)
+const sym_start = Libdl.dlsym(lib, :perf_event_start)
+const sym_reset = Libdl.dlsym(lib, :perf_event_reset)
+const sym_count = Libdl.dlsym(lib, :perf_event_count)
+const sym_get_count = Libdl.dlsym(lib, :perf_event_get_count)
+
+const count_cycles = ARGS[2]
 
 macro gctime(ex)
     fc = isdefined(Base.Experimental, Symbol("@force_compile")) ?
@@ -18,18 +20,18 @@ macro gctime(ex)
         $fc
         local result
         try
+            if count_cycles == "--cycles-count"
+                ccall(sym_start, Cvoid, ())
+                ccall(:jl_gc_set_cb_pre_gc, Cvoid, (Ptr{Cvoid}, Cint),
+                      sym_reset, true)
+                ccall(:jl_gc_set_cb_post_gc, Cvoid, (Ptr{Cvoid}, Cint),
+                      sym_count, true)
+            end
             local start_gc_num = Base.gc_num()
             local start_time = time_ns()
             local val = $(esc(ex))
             local end_time = time_ns()
             local end_gc_num = Base.gc_num()
-            # Re-run with `perf` callbacks turned on
-            ccall(sym_start, Cvoid, ())
-            ccall(:jl_gc_set_cb_pre_gc, Cvoid, (Ptr{Cvoid}, Cint),
-                  sym_reset, true)
-            ccall(:jl_gc_set_cb_post_gc, Cvoid, (Ptr{Cvoid}, Cint),
-                  sym_count, true)
-            $(esc(ex))
             result = (
                 value = val,
                 times = (end_time - start_time),

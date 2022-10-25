@@ -49,7 +49,7 @@ function run_bench(runs, threads, file, show_json = false)
     for _ in 1:runs
         # uglyness to communicate over non stdout (specifically file descriptor 3)
         p = Base.PipeEndpoint()
-        cmd = `$JULIAVER --project=. --threads=$threads $file SERIALIZE`
+        cmd = `$JULIAVER --project=. --threads=$threads $file SERIALIZE --no-cycles-count`
         cmd = run(Base.CmdRedirect(cmd, p, 3), stdin, stdout, stderr, wait=false)
         r = deserialize(p)
         @assert success(cmd)
@@ -58,6 +58,13 @@ function run_bench(runs, threads, file, show_json = false)
         push!(times, r.times)
         push!(gc_diff, r.gc_diff)
         push!(gc_end, r.gc_end)
+        # run once more to measure cycles
+        p = Base.PipeEndpoint()
+        cmd = `$JULIAVER --project=. --threads=$threads $file SERIALIZE --cycles-count`
+        cmd = run(Base.CmdRedirect(cmd, p, 3), stdin, stdout, stderr, wait=false)
+        r = deserialize(p)
+        @assert success(cmd)
+        # end uglyness
         push!(gc_cycles, r.gc_cycles)
     end
     total_stats = get_stats(times) ./ 1_000_000
