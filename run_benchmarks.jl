@@ -25,7 +25,7 @@ const JULIAVER = Base.julia_cmd()[1]
 # times in ns
 # TODO: get better stats
 function get_stats(times::Vector)
-    return [minimum(times), median(times), maximum(times)]
+    return [minimum(times), median(times), maximum(times), std(times)]
 end
 
 """
@@ -69,7 +69,7 @@ function run_bench(runs, threads, file, show_json = false)
 
     header = (["", "total time", "gc time", "mark time", "sweep time", "max GC pause", "time to safepoint", "max heap", "percent gc"],
               ["", "ms",         "ms",       "ms",          "ms",       "ms",          "us",                "MB",       "%"        ])
-    labels = ["minimum", "median", "maximum"]
+    labels = ["minimum", "median", "maximum", "stdev"]
     highlighters = highlight_col(4, 10, 100) # max pause
     append!(highlighters, highlight_col(5, 1, 10)) # time to safepoint
     append!(highlighters, highlight_col(7, 10, 50)) # pct gc
