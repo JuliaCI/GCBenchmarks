@@ -66,7 +66,7 @@ struct PointByY
 end
 Base.isless(a::PointByY, b::PointByY) = isless(a.p.y, b.p.y)
 
-function tvbench(; N = 100_000_000, min_seconds = 0, max_seconds = 600)
+function tvbench(; N = 100_000_000, min_seconds = 0, max_seconds = 1000)
     @assert min_seconds <= max_seconds
 
     t0 = time()
@@ -89,7 +89,6 @@ function tvbench(; N = 100_000_000, min_seconds = 0, max_seconds = 600)
             delete!(ytree, PointByY(p))
         end
 
-        #=
         i = i + 1
         if i == 100
             i = 0
@@ -100,11 +99,11 @@ function tvbench(; N = 100_000_000, min_seconds = 0, max_seconds = 600)
                 tcheck = tcheck2
                 println("elapsed=$(elapsed)s, $(length(queue)) current points, $(count) total, $(floor(count/elapsed)) per second")
             end
-	    if (count >= N) && (elapsed > min_seconds)
-		break
-	    end
+            if (elapsed >= min_seconds) && ((count >= N) || (elapsed >= max_seconds))
+                break
+            end
 	end
-        =#
+        #=
         nm, nr = fldmod(count, 1_000_000)
         if nr == 0
             @show nm
@@ -114,6 +113,7 @@ function tvbench(; N = 100_000_000, min_seconds = 0, max_seconds = 600)
         if (elapsed >= min_seconds) && ((count >= N) || (elapsed >= max_seconds))
             break
         end
+        =#
     end
 end
 
