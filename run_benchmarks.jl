@@ -70,9 +70,9 @@ function run_bench(runs, threads, file, show_json = false)
     header = (["", "total time", "gc time", "mark time", "sweep time", "max GC pause", "time to safepoint", "max heap", "percent gc"],
               ["", "ms",         "ms",       "ms",          "ms",       "ms",          "us",                "MB",       "%"        ])
     labels = ["minimum", "median", "maximum", "stdev"]
-    highlighters = highlight_col(4, 10, 100) # max pause
-    append!(highlighters, highlight_col(5, 1, 10)) # time to safepoint
-    append!(highlighters, highlight_col(7, 10, 50)) # pct gc
+    highlighters = highlight_col(6, 10, 100) # max pause
+    append!(highlighters, highlight_col(7, 1, 10)) # time to safepoint
+    append!(highlighters, highlight_col(9, 10, 50)) # pct gc
     highlighters = Tuple(highlighters)
     if show_json
         data = Dict([("total time", total_stats),
