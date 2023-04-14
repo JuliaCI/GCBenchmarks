@@ -24,8 +24,8 @@ end #module
 
 using .ManyRef
 
-const MAX_MEMORY = round(Int, 0.8 * Sys.total_memory())
+const GB = 1<<30
+const MAX_MEMORY = round(Int, 0.8 * GB)
 const array_length = div(MAX_MEMORY, 3*sizeof(Ptr{C_NULL}))
 
-@info "ManyRef bench" array_length MAX_MEMORY
 @gctime ManyRef.construct(array_length)
