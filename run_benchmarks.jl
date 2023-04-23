@@ -25,7 +25,7 @@ const JULIAVER = Base.julia_cmd()[1]
 # times in ns
 # TODO: get better stats
 function get_stats(times::Vector)
-    return [minimum(times), median(times), maximum(times), std(times)]
+    return (minimum(times), median(times), maximum(times), std(times))
 end
 
 """
@@ -40,15 +40,27 @@ function highlight_col(col, lo, hi)
      Highlighter((data,i,j) -> (j == col) && hi <= data[i, j]; foreground=:red),]
 end
 
+function diff(gc_end, gc_start, p)
+    v0 = getproperty(gc_start, p)
+    v1 = getproperty(gc_end, p)
+    v1-v0
+end
+
+function extract(gc_end, gc_start, p)
+    map((gc_end, gc_start)->diff(gc_end, gc_start, p), zip(gc_end, gc_start))
+end
+
 function run_bench(runs, threads, file, show_json = false)
     value = []
     times = []
     gc_diff = []
     gc_end = []
+    gc_start = []
     for _ in 1:runs
         # uglyness to communicate over non stdout (specifically file descriptor 3)
         p = Base.PipeEndpoint()
-        cmd = `$JULIAVER --project=. --threads=$threads $file SERIALIZE`
+        gcthreads = threads == 1 ? `` : `--gcthreads=$(threads-1)`
+        cmd = `$JULIAVER --project=. --threads=$threads $gcthreads $file SERIALIZE`
         cmd = run(Base.CmdRedirect(cmd, p, 3), stdin, stdout, stderr, wait=false)
         r = deserialize(p)
         @assert success(cmd)
@@ -57,13 +69,16 @@ function run_bench(runs, threads, file, show_json = false)
         push!(times, r.times)
         push!(gc_diff, r.gc_diff)
         push!(gc_end, r.gc_end)
+        push!(gc_start, r.gc_start)
     end
     total_stats = get_stats(times) ./ 1_000_000
-    gc_time = get_stats(map(stat->stat.total_time, gc_end)) ./ 1_000_000
-    mark_time = get_stats(map(stat->stat.total_mark_time, gc_end)) ./ 1_000_000
-    sweep_time = get_stats(map(stat->stat.total_sweep_time, gc_end)) ./ 1_000_000
+
+    gc_time =  get_stats(extract(gc_end, gc_start, :total_time)) ./ 1_000_000
+    mark_time = get_stats(extract(gc_end, gc_start, :total_mark_time)) ./ 1_000_000
+    mark_time = get_stats(extract(gc_end, gc_start, :total_sweep_time)) ./ 1_000_000
+    time_to_safepoint = get_stats(extract(gc_end, gc_start, :time_to_safepoint)) ./ 1_000
+
     max_pause = get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000
-    time_to_safepoint = get_stats(map(stat->stat.time_to_safepoint, gc_end)) ./ 1_000
     max_mem = get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2
     pct_gc = get_stats(map((t,stat)->(stat.total_time/t), times, gc_diff)) .* 100
 

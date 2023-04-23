@@ -15,26 +15,28 @@ macro gctime(ex)
             local val = $(esc(ex))
             local end_time = time_ns()
             local end_gc_num = Base.gc_num()
-            result = (
+            result = (;
                 value = val,
                 times = (end_time - start_time),
                 gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
+                gc_start = start_gc_num,
                 gc_end = end_gc_num
             )
         catch e
             @show e
-            result = (
+            result = (;
                 value = e,
                 times = NaN,
                 gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
+                gc_start = start_gc_num,
                 gc_end = end_gc_num
             )
         end
         if "SERIALIZE" in ARGS
             # uglyness to communicate over non stdout (specifically file descriptor 3)
-            serialize(open(RawFD(3)), result)
+            @invokelatest serialize(open(RawFD(3)), result)
         else
-            display(result)
+            @invokelatest display(result)
         end
     end
 end
