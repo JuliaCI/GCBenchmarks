@@ -25,7 +25,7 @@ const JULIAVER = Base.julia_cmd()[1]
 # times in ns
 # TODO: get better stats
 function get_stats(times::Vector)
-    return (minimum(times), median(times), maximum(times), std(times))
+    return [minimum(times), median(times), maximum(times), std(times)]
 end
 
 """
@@ -47,7 +47,7 @@ function diff(gc_end, gc_start, p)
 end
 
 function extract(gc_end, gc_start, p)
-    map((gc_end, gc_start)->diff(gc_end, gc_start, p), zip(gc_end, gc_start))
+    map((gc_end, gc_start)->diff(gc_end, gc_start, p), gc_end, gc_start)
 end
 
 function run_bench(runs, threads, file, show_json = false)
@@ -75,8 +75,8 @@ function run_bench(runs, threads, file, show_json = false)
 
     gc_time =  get_stats(extract(gc_end, gc_start, :total_time)) ./ 1_000_000
     mark_time = get_stats(extract(gc_end, gc_start, :total_mark_time)) ./ 1_000_000
-    mark_time = get_stats(extract(gc_end, gc_start, :total_sweep_time)) ./ 1_000_000
-    time_to_safepoint = get_stats(extract(gc_end, gc_start, :time_to_safepoint)) ./ 1_000
+    sweep_time = get_stats(extract(gc_end, gc_start, :total_sweep_time)) ./ 1_000_000
+    time_to_safepoint = get_stats(extract(gc_end, gc_start, :total_time_to_safepoint)) ./ 1_000
 
     max_pause = get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000
     max_mem = get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2
