@@ -21,7 +21,7 @@ function plot_results(table; log2_axes = true, violin = true)
 			push!(mean_data, (; file, gcthreads, mark_time = mean(t.mark_time), threads=first(t.threads)))
 		end
 		mean_table = Table(row for row in mean_data)
-		t0 = filter(r -> r.gcthreads == 0, mean_table).mark_time
+		t0 = filter(r -> r.gcthreads == 1, mean_table).mark_time
 		speedup = t0 ./ mean_table.mark_time
 		mean_table = Table(mean_table; speedup)
 
@@ -30,11 +30,11 @@ function plot_results(table; log2_axes = true, violin = true)
 			valign = :bottom,font = :bold, padding = (0, 0, 15, 0))
 		
 		ax = Axis(f[idx, 1]; title="Speedup", kwargs...)
-		scatterlines!(ax, mean_table.gcthreads .+ 1, mean_table.speedup)
-		lines!(ax, mean_table.gcthreads .+ 1, mean_table.gcthreads .+ 1, color=:lightblue)
+		scatterlines!(ax, mean_table.gcthreads, mean_table.speedup)
+		lines!(ax, mean_table.gcthreads, mean_table.gcthreads, color=:lightblue)
 
 		ax = Axis(f[idx, 2]; title="Mark times (ms)", kwargs...)
-		gcthreads = bench.gcthreads .+ 1
+		gcthreads = bench.gcthreads
 		mark_times = bench.mark_time ./ 1_000_000
 		if violin
 			violin!(ax, gcthreads, mark_times;

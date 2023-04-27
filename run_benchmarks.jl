@@ -6,7 +6,7 @@ Usage:
 Options:
     -n <runs>, --runs=<runs>              Number of runs for each benchmark [default: 10].
     -t <threads>, --threads=<threads>     Number of threads to use [default: 1].
-    -g <threads>, --gcthreads=<threads>     Number of threads to use [default: 0].
+    -g <threads>, --gcthreads=<threads>   Number of GC threads to use [default: 0]. 
     -s <max>, --scale=<max>               Maximum number of gcthreads for scaling test.
     -h, --help                            Show this screen.
     --version                             Show version.
@@ -139,7 +139,7 @@ function run_category_files(benches, args, show_json = false)
         else
             local n = 0
             while true
-                gcthreads = 2^n - 1
+                gcthreads = 2^n
                 gcthreads > max && break
                 @show (gcthreads, threads)
                 run_bench(runs, threads, gcthreads, bench, show_json)
