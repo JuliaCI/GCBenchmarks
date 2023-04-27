@@ -1,0 +1,23 @@
+steps:
+  - label: "Julia v1"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "1.9-nightly"
+          version: "nightly"
+    agents:
+      queue: "juliaecosystem"
+      exclusive: true
+      arch: "x86_64"
+    commands: |
+      echo "--- Instantiate"
+      julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.build()'
+
+      # Run benchmark
+      echo "+++ Run benchmarks serial"
+      julia --threads=auto --project=. run_benchmarks.jl serial all
+
+    artifact_paths:
+      - "results.csv"
+
+    if: build.message !~ /\[skip tests\]/
+    timeout_in_minutes: 60
