@@ -6,7 +6,8 @@ Usage:
 Options:
     -n <runs>, --runs=<runs>              Number of runs for each benchmark [default: 10].
     -t <threads>, --threads=<threads>     Number of threads to use [default: 1].
-    -s <max>, --scale=<max>               Maximum number of threads for scaling test.
+    -g <threads>, --gcthreads=<threads>   Number of GC threads to use [default: 0]. 
+    -s <max>, --scale=<max>               Maximum number of gcthreads for scaling test.
     -h, --help                            Show this screen.
     --version                             Show version.
     --json                                Serializes output to `json` file
@@ -18,6 +19,8 @@ using PrettyTables
 using Printf
 using Serialization
 using Statistics
+using TypedTables
+using CSV
 
 const args = docopt(doc, version = v"0.1.1")
 const JULIAVER = Base.julia_cmd()[1]
@@ -40,15 +43,27 @@ function highlight_col(col, lo, hi)
      Highlighter((data,i,j) -> (j == col) && hi <= data[i, j]; foreground=:red),]
 end
 
-function run_bench(runs, threads, file, show_json = false)
+function diff(gc_end, gc_start, p)
+    v0 = getproperty(gc_start, p)
+    v1 = getproperty(gc_end, p)
+    v1-v0
+end
+
+function extract(gc_end, gc_start, p)
+    map((gc_end, gc_start)->diff(gc_end, gc_start, p), gc_end, gc_start)
+end
+
+function run_bench(runs, threads, gcthreads, file, show_json = false)
     value = []
     times = []
     gc_diff = []
     gc_end = []
+    gc_start = []
     for _ in 1:runs
         # uglyness to communicate over non stdout (specifically file descriptor 3)
         p = Base.PipeEndpoint()
-        cmd = `$JULIAVER --project=. --threads=$threads $file SERIALIZE`
+        _gcthreads = gcthreads == 0 ? `` : `--gcthreads=$gcthreads`
+        cmd = `$JULIAVER --project=. --threads=$threads $_gcthreads $file SERIALIZE`
         cmd = run(Base.CmdRedirect(cmd, p, 3), stdin, stdout, stderr, wait=false)
         r = deserialize(p)
         @assert success(cmd)
@@ -57,13 +72,33 @@ function run_bench(runs, threads, file, show_json = false)
         push!(times, r.times)
         push!(gc_diff, r.gc_diff)
         push!(gc_end, r.gc_end)
+        push!(gc_start, r.gc_start)
     end
+    gc_times =  extract(gc_end, gc_start, :total_time)
+    mark_times = extract(gc_end, gc_start, :total_mark_time)
+    sweep_times = extract(gc_end, gc_start, :total_sweep_time)
+    times_to_safepoint = extract(gc_end, gc_start, :total_time_to_safepoint)
+
+    data = Table(
+        time = times,
+        gc_time = gc_times,
+        mark_time = mark_times,
+        sweep_time = sweep_times,
+        time_to_safepoint = times_to_safepoint,
+        file = [file for _ in 1:runs],
+        threads = [threads for _ in 1:runs],
+        gcthreads = [gcthreads for _ in 1:runs], 
+    )
+    results = joinpath(@__DIR__, "results.csv")
+    CSV.write(results, data; append=isfile(results))
+
     total_stats = get_stats(times) ./ 1_000_000
-    gc_time = get_stats(map(stat->stat.total_time, gc_end)) ./ 1_000_000
-    mark_time = get_stats(map(stat->stat.total_mark_time, gc_end)) ./ 1_000_000
-    sweep_time = get_stats(map(stat->stat.total_sweep_time, gc_end)) ./ 1_000_000
+    gc_time =  get_stats(gc_times) ./ 1_000_000
+    mark_time = get_stats(mark_times) ./ 1_000_000
+    sweep_time = get_stats(sweep_times) ./ 1_000_000
+    time_to_safepoint = get_stats(times_to_safepoint) ./ 1_000
+
     max_pause = get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000
-    time_to_safepoint = get_stats(map(stat->stat.time_to_safepoint, gc_end)) ./ 1_000
     max_mem = get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2
     pct_gc = get_stats(map((t,stat)->(stat.total_time/t), times, gc_diff)) .* 100
 
@@ -93,20 +128,21 @@ end
 function run_category_files(benches, args, show_json = false)
     local runs = parse(Int, args["--runs"])
     local threads = parse(Int, args["--threads"])
+    local gcthreads = parse(Int, args["--gcthreads"])
     local max = if isnothing(args["--scale"]) 0 else parse(Int, args["--scale"]) end
     for bench in benches
         if !show_json
             @show bench
         end
         if isnothing(args["--scale"])
-            run_bench(runs, threads, bench, show_json)
+            run_bench(runs, threads, gcthreads, bench, show_json)
         else
             local n = 0
             while true
-                threads = 2^n
-                threads > max && break
-                @show threads
-                run_bench(runs, threads, bench, show_json)
+                gcthreads = 2^n
+                gcthreads > max && break
+                @show (gcthreads, threads)
+                run_bench(runs, threads, gcthreads, bench, show_json)
                 n += 1
             end
         end
@@ -124,11 +160,12 @@ function run_all_categories(args, show_json = false)
 end
 
 function main(args)
+    rm("results.csv", force=true)
     cd(joinpath(@__DIR__, "benches"))
 
     # validate choices
     if !isnothing(args["--scale"])
-        @assert args["--threads"] == "1" "Specify either --scale or --threads."
+        @assert args["--gcthreads"] == "0" "Specify either --scale or --threads."
     end
 
     # select benchmark class
