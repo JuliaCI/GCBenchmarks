@@ -1,5 +1,5 @@
 steps:
-  - label: "Julia {{matrix.version}} -- {{matrix.benchmark}}"
+  - label: "Julia {{matrix.version}} -- {{matrix.benchmark}} -- {{matrix.category}}"
     plugins:
       - JuliaCI/julia#v1:
           version: "{{matrix.version}}"
@@ -9,18 +9,37 @@ steps:
           - "1.9-nightly"
           - "nightly"
         benchmark:
-          - "A"
-          - "B"
+          - "serial"
+          - "multithreaded"
+        category:
+          - "all"
+      adjustments:
+         - with:
+            version: "nightly"
+            benchmark: "slow"
+            category: "rb_tree"
+         - with:
+            version: "1.9-nightly"
+            benchmark: "slow"
+            category: "rb_tree"
+         - with:
+            version: "nightly"
+            benchmark: "slow"
+            category: "bigint"
+         - with:
+            version: "1.9-nightly"
+            benchmark: "slow"
+            category: "bigint"
+
     agents:
       queue: "juliaecosystem"
-      exclusive: true
       arch: "x86_64"
     commands: |
       echo "--- Instantiate"
       julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.build()'
 
       echo "+++ Run benchmarks {{matrix.benchmark}}"
-      julia --threads=auto --project=. run_benchmarks.jl {{matrix.benchmark}} all
+      julia --threads=auto --project=. run_benchmarks.jl {{matrix.benchmark}} {{matrix.category}}
     artifact_paths:
       - "results.csv"
 
