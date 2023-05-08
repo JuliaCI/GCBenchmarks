@@ -1,9 +1,16 @@
 steps:
-  - label: "Julia v1"
+  - label: "Julia {{matrix.version}} -- {{matrix.benchmark}}"
     plugins:
       - JuliaCI/julia#v1:
-          version: "1.9-nightly"
-          version: "nightly"
+          version: "{{matrix.version}}"
+    matrix:
+    setup:
+      version:
+        - "1.9-nightly"
+        - "nightly"
+      benchmark:
+        - "A"
+        - "B"
     agents:
       queue: "juliaecosystem"
       exclusive: true
@@ -12,10 +19,8 @@ steps:
       echo "--- Instantiate"
       julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.build()'
 
-      # Run benchmark
-      echo "+++ Run benchmarks serial"
-      julia --threads=auto --project=. run_benchmarks.jl serial all
-
+      echo "+++ Run benchmarks {{matrix.benchmark}}"
+      julia --threads=auto --project=. run_benchmarks.jl {{matrix.benchmark}} all
     artifact_paths:
       - "results.csv"
 
