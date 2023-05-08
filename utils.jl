@@ -35,7 +35,7 @@ macro gctime(ex)
             )
         end
 
-        run(`ps uxww`)
+        #run(`ps uxww`)
         #run(`pmap $(getpid())`)
 
         if "SERIALIZE" in ARGS
