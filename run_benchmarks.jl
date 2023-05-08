@@ -78,6 +78,8 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
     mark_times = extract(gc_end, gc_start, :total_mark_time)
     sweep_times = extract(gc_end, gc_start, :total_sweep_time)
     times_to_safepoint = extract(gc_end, gc_start, :total_time_to_safepoint)
+    ncollect = extract(gc_end, gc_start, :collect)
+    nfull_sweep = extract(gc_end, gc_start, :full_sweep)
 
     data = Table(
         time = times,
@@ -85,9 +87,12 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
         mark_time = mark_times,
         sweep_time = sweep_times,
         time_to_safepoint = times_to_safepoint,
+        ncollections = ncollect,
+        nfull_sweeps = nfull_sweep,
         file = [file for _ in 1:runs],
         threads = [threads for _ in 1:runs],
-        gcthreads = [gcthreads for _ in 1:runs], 
+        gcthreads = [gcthreads for _ in 1:runs],
+        version = [string(Base.VERSION) for _ in 1:runs],
     )
     results = joinpath(@__DIR__, "results.csv")
     CSV.write(results, data; append=isfile(results))
