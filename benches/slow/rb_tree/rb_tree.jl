@@ -66,7 +66,7 @@ struct PointByY
 end
 Base.isless(a::PointByY, b::PointByY) = isless(a.p.y, b.p.y)
 
-function tvbench(; N = 20_000_000)
+function tvbench(; N = 50_000_000)
     t0 = time()
     queue = Queue{Point}()
     xtree = RBTree{PointByX}()
