@@ -13,10 +13,10 @@ steps:
         category:
           - "all"
       adjustments:
-         - with:
-            version: "nightly"
-            benchmark: "slow"
-            category: "rb_tree"
+        #  - with:
+        #     version: "nightly"
+        #     benchmark: "slow"
+        #     category: "rb_tree"
          - with:
             version: "nightly"
             benchmark: "slow"
