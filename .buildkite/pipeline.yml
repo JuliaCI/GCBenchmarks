@@ -4,13 +4,13 @@ steps:
       - JuliaCI/julia#v1:
           version: "{{matrix.version}}"
     matrix:
-    setup:
-      version:
-        - "1.9-nightly"
-        - "nightly"
-      benchmark:
-        - "A"
-        - "B"
+      setup:
+        version:
+          - "1.9-nightly"
+          - "nightly"
+        benchmark:
+          - "A"
+          - "B"
     agents:
       queue: "juliaecosystem"
       exclusive: true
