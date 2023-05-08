@@ -6,7 +6,6 @@ steps:
     matrix:
       setup:
         version:
-          - "1.9-nightly"
           - "nightly"
         benchmark:
           - "serial"
@@ -19,21 +18,13 @@ steps:
             benchmark: "slow"
             category: "rb_tree"
          - with:
-            version: "1.9-nightly"
-            benchmark: "slow"
-            category: "rb_tree"
-         - with:
             version: "nightly"
             benchmark: "slow"
             category: "bigint"
-         - with:
-            version: "1.9-nightly"
-            benchmark: "slow"
-            category: "bigint"
-
     agents:
       queue: "juliaecosystem"
       arch: "x86_64"
+      os: "linux"
     commands: |
       echo "--- Instantiate"
       julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.build()'
