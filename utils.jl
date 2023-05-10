@@ -2,6 +2,24 @@ using Pkg
 Pkg.instantiate() # It is dumb that I have to do this
 using Serialization
 
+module ITT
+    import Libdl
+    const GC_LIB = joinpath(@__DIR__, "lib/itt.so")
+
+    function __init__()
+        lib = Libdl.dlopen(GC_LIB)
+        sym_init = Libdl.dlsym(lib, :init)
+        sym_begin = Libdl.dlsym(lib, :gc_begin)
+        sym_end = Libdl.dlsym(lib, :gc_end)
+
+        ccall(sym_init, Cvoid, ())
+        ccall(:jl_gc_set_cb_pre_gc, Cvoid, (Ptr{Cvoid}, Cint),
+                sym_begin, true)
+        ccall(:jl_gc_set_cb_post_gc, Cvoid, (Ptr{Cvoid}, Cint),
+                sym_end, true)
+    end
+end
+
 macro gctime(ex)
     fc = isdefined(Base.Experimental, Symbol("@force_compile")) ?
         :(Base.Experimental.@force_compile) :
