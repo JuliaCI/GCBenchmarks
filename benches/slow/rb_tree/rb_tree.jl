@@ -97,7 +97,7 @@ function tvbench(; N = 50_000_000)
                 tcheck = tcheck2
                 println("elapsed=$(elapsed)s, $(length(queue)) current points, $(count) total, $(floor(count/elapsed)) per second")
             end
-            if (count >= N)
+            if count >= 2 * N
                 break
             end
 	end
