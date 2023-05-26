@@ -3,10 +3,8 @@ steps:
     plugins:
       - JuliaCI/julia#v1:
           version: "{{matrix.version}}"
-    plugins:
       - vchuravy/polarsignals:
           cloud_token: "eyJhbGciOiJFZERTQSJ9.eyJhdWQiOiJmYjRkM2Y1ZC1lMGQ1LTRmODMtYTg4Yy1mMDNhNWE1ZmE4ODkiLCJpYXQiOjE2ODUxMjY3MjkzODIxNzEzMDcsImlzcyI6Imh0dHBzOi8vYXBpLnBvbGFyc2lnbmFscy5jb20vIiwianRpIjoiMDQxYTZhMGEtYWMxNi00Njk1LThjZjUtN2RjMzNhZmRhMzFlIiwicHJvamVjdElkIjoiZmI0ZDNmNWQtZTBkNS00ZjgzLWE4OGMtZjAzYTVhNWZhODg5IiwidmVyc2lvbiI6IjEuMC4wIiwid3JpdGVQcm9maWxlcyI6dHJ1ZX0.70Hjge3rHdWRP7-M3sgkH44JT1QYphN8ekuqx51RbYN2HFAlndGZqnmhT_X96ZpANb5DLM3jAEgvWpHuFnayAg"
-
     matrix:
       setup:
         version:
