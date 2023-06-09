@@ -12,8 +12,9 @@ Usage:
     run_benchmarks.jl --version
 Options:
     -n <runs>, --runs=<runs>              Number of runs for each benchmark [default: 10].
-    -t <threads>, --threads=<threads>     Number of threads to use [default: 1].
-    -s <max>, --scale=<max>               Maximum number of threads for scaling test.
+    -t <threads>, --threads=<threads>     Number of mutator threads to use [default: 1].
+    --gcthreasds=<gcthreads>              Number of GC threads to use [default: 1].
+    -s <max>, --scale=<max>               Maximum number of GC threads for scaling test.
     -h, --help                            Show this screen.
     --version                             Show version.
 ```
@@ -21,24 +22,23 @@ Options:
 ## Classes
 
 There are three classes of benchmarks:
-- *Serial* benchmarks do not use threads. The `--threads` and `--scale` options are only
-  useful if testing multithreaded GC.
-- *Multithreaded* benchmarks do use threads.
+- *Serial* benchmarks run on a single mutator thread.
+- *Multithreaded* benchmarks may run on multiple mutator threads.
 - *Slow* benchmarks are long-running in comparison with the other two classes.
 
 ## Examples
 
-- Run all serial benchmarks 5 times each using 1 thread:
+- Run all serial benchmarks 5 times each using 1 mutator thread and 1 GC thread:
 
   `julia --project=. run_benchmarks.jl serial all -n 5`
 
-- Run the binary tree benchmarks 10 times each with 1, 2, 4 and 8 threads:
+- Run the binary tree benchmarks 10 times each with 1, 2, 4 and 8 GC threads (and 8 mutator threads):
 
-  `julia --project=. run_benchmarks.jl multithreaded binary_tree -s 8`
+  `julia --project=. run_benchmarks.jl multithreaded binary_tree -t 8 -s 8`
 
-- Run the red-black tree benchmark once using 1 thread:
+- Run the red-black tree benchmark once using 1 mutator thread and 4 GC threads:
 
-  `julia --project=. run_benchmarks.jl slow rb_tree rb_tree -n 1`
+  `julia --project=. run_benchmarks.jl slow rb_tree rb_tree -n 1 --gcthreads 4`
 
 ## The benchmarks
 
@@ -46,14 +46,11 @@ There are three classes of benchmarks:
 | ---   | ---      | ---  | ---         |
 | Serial | TimeZones | TimeZones.jl | Creation of timezones which involve repeated short `String` allocations. |
 |        | append | append.jl | Repeatedly growing `Vector`s. |
-|        | bigint | pidigits.jl | Tests large `BigInt`s. |
-|        |        | pollard.jl | Tests small `BigInt`s. |
+|        | bigint | pollard.jl | Tests small `BigInt`s. |
 |        | linked | list.jl | Small pointer-heavy data structure. |
 |        |        | tree.jl | Small pointer-heavy data structure. |
 |        | strings | strings.jl | |
 | Multithreaded | binary_tree | tree_immutable.jl | Small pointer-heavy data structure. |
 |               |             | tree_mutable.jl | Small pointer-heavy data structure. |
-|               | flux | flux_multithreaded_training.jl | |
-|               | ttsp | ttsp.jl | Time-to-safepoint. |
 | Slow | rb\_tree | rb\_tree.jl | Pointer graph whose minimum linear arrangement has cost Θ(n²). |
-|      | diffeq | ensemblesolve.jl | |
+|      | pidigits.jl | Tests large `BigInt`s. |
