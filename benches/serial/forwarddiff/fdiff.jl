@@ -246,4 +246,4 @@ function foo()
     end
 end
 
-@gc_time foo()
+@gctime foo()
