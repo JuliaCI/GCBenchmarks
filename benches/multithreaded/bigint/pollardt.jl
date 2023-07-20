@@ -1,8 +1,8 @@
 include(joinpath("..", "..", "..", "utils.jl"))
 
-function pollardfactor(n::T=big(1208925819691594988651321)) where T<:Integer
-    for c in T(1):(n - 3)
-        G, r, q = ones(T,3)
+function pollardfactor(n::T=big(1208925819691594988651321)) where {T<:Integer}
+    for c in T(1):(n-3)
+        G, r, q = ones(T, 3)
         y = 2
         m::T = 1900
         ys::T = 0
