@@ -4,11 +4,6 @@ using LinearAlgebra, Statistics, ForwardDiff
 
 const BENCH_OPNORMS = (66.0, 33.0, 22.0, 11.0, 6.0, 3.0, 2.0, 0.5, 0.03, 0.001)
 
-"""
-Generates one random matrix per opnorm.
-All generated matrices are scale multiples of one another.
-This is meant to exercise all code http://localhost:55600/ui/flamegraphpaths in the `expm` function.
-"""
 function randmatrices(n)
     A = randn(n, n)
     op = opnorm(A, 1)
