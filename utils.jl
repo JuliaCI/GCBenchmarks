@@ -2,6 +2,27 @@ using Pkg
 Pkg.instantiate() # It is dumb that I have to do this
 using Serialization
 
+idx = Ref{Int}(0)
+thrashing_stamps = zeros(UInt64, 3)
+
+function gc_cb_on_pressure()
+    t = time_ns()
+    thrashing_stamps[idx[] % 3 + 1] = t
+    idx[] += 1
+    if idx[] >= 3
+        # three thrashing stamps in three seconds: abort
+        if t - thrashing_stamps[idx[] % 3 + 1] <= 3_000_000_000
+            @ccall abort()::Cvoid
+        end
+    end
+    nothing
+end
+
+if VERSION >= v"1.10-alpha1"
+    ccall(:jl_gc_set_cb_notify_gc_pressure, Cvoid, (Ptr{Cvoid}, Cint),
+        @cfunction(gc_cb_on_pressure, Cvoid, ()), true)
+end
+
 macro gctime(ex)
     fc = isdefined(Base.Experimental, Symbol("@force_compile")) ?
         :(Base.Experimental.@force_compile) :
