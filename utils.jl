@@ -47,7 +47,6 @@ macro gctime(ex)
                 gc_end = end_gc_num
             )
         catch e
-            print("EXCEPTION???")
             @show e
             result = (;
                 value = e,
