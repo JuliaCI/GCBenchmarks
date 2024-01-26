@@ -75,11 +75,17 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
         push!(gc_start, r.gc_start)
     end
     gc_times =  extract(gc_end, gc_start, :total_time)
-    mark_times = extract(gc_end, gc_start, :total_mark_time)
-    sweep_times = extract(gc_end, gc_start, :total_sweep_time)
-    times_to_safepoint = extract(gc_end, gc_start, :total_time_to_safepoint)
     ncollect = extract(gc_end, gc_start, :collect)
     nfull_sweep = extract(gc_end, gc_start, :full_sweep)
+    mark_times = isdefined(gc_end, :total_mark_time) ?
+        extract(gc_end, gc_start, :total_mark_time) :
+        zeros(Int64, length(gc_end))
+    sweep_times = isdefined(gc_end, :total_sweep_time) ?
+        extract(gc_end, gc_start, :total_sweep_time) :
+        zeros(Int64, length(gc_end))
+    times_to_safepoint = isdefined(gc_end, :total_time_to_safepoint) ?
+        extract(gc_end, gc_start, :total_time_to_safepoint) :
+        zeros(Int64, length(gc_end))
 
     data = Table(
         time = times,
@@ -103,8 +109,12 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
     sweep_time = get_stats(sweep_times) ./ 1_000_000
     time_to_safepoint = get_stats(times_to_safepoint) ./ 1_000
 
-    max_pause = get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000
-    max_mem = get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2
+    max_pause = isdefined(stat, :max_pause) ?
+        get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000 :
+        zeros(Float64, 4)
+    max_mem = isdefined(stat, :max_memory) ?
+        get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2 :
+        zeros(Float64, 4)
     pct_gc = get_stats(map((t,stat)->(stat.total_time/t), times, gc_diff)) .* 100
 
     header = (["", "total time", "gc time", "mark time", "sweep time", "max GC pause", "time to safepoint", "max heap", "percent gc"],

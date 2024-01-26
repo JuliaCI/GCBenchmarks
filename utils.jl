@@ -61,9 +61,9 @@ macro gctime(ex)
 
         if "SERIALIZE" in ARGS
             # uglyness to communicate over non stdout (specifically file descriptor 3)
-            @invokelatest serialize(open(RawFD(3)), result)
+            Base.@invokelatest serialize(open(RawFD(3)), result)
         else
-            @invokelatest display(result)
+            Base.@invokelatest display(result)
         end
     end
 end
