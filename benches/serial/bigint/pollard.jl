@@ -1,4 +1,4 @@
-include(joinpath("..", "..", "..", "utils.jl"))
+include(joinpath("..", "..", "..", "util", "utils.jl"))
 
 function pollardfactor(n::T=big(1208925819691594988651321)) where T<:Integer
     for c in T(1):(n - 3)

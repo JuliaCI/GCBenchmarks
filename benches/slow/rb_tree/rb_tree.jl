@@ -1,4 +1,4 @@
-include(joinpath("..", "..", "..", "utils.jl"))
+include(joinpath("..", "..", "..", "util", "utils.jl"))
 
 # Simple GC benchmark for performance on pointer graphs whose minimum linear arrangement
 # has cost θ(n^2). tvbench() maintains a set of N points each of which has a random (x,y)

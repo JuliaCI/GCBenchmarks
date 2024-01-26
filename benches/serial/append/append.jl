@@ -1,4 +1,4 @@
-include(joinpath("..", "..", "..", "utils.jl"))
+include(joinpath("..", "..", "..", "util", "utils.jl"))
 
 # simulates allocation profile of some dataframes benchmarks
 # by repeatedly append to a vector
