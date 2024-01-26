@@ -18,7 +18,8 @@ function gc_cb_on_pressure()
     nothing
 end
 
-if VERSION >= v"1.10-alpha1"
+if VERSION >= v"1.11-DEV.0"
+    @info "Setting GC memory pressure callback"
     ccall(:jl_gc_set_cb_notify_gc_pressure, Cvoid, (Ptr{Cvoid}, Cint),
         @cfunction(gc_cb_on_pressure, Cvoid, ()), true)
 end
