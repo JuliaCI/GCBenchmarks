@@ -1,9 +1,7 @@
 include(joinpath("..", "..", "..", "utils.jl"))
 
-const NUM_DOMAINS = 16
-const N = (1 << 20) * NUM_DOMAINS
-
-const bubble_sort_threshold = 32
+const N = 32 * (1 << 20)
+const BUBBLE_SORT_THRESHOLD = 32
 
 using Random
 Random.seed!(42)
@@ -48,7 +46,7 @@ function merge(src, dst, start, split, limit)
 end
 
 function merge_sort(move, a, b, start, limit)
-    if move || limit - start > bubble_sort_threshold
+    if move || limit - start > BUBBLE_SORT_THRESHOLD
         split = (start + limit) ÷ 2
         r1 = Threads.@spawn merge_sort(!move, a, b, start, split)
         r2 = Threads.@spawn merge_sort(!move, a, b, split, limit)
