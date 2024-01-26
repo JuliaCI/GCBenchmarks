@@ -1,6 +1,6 @@
 const doc = """run_benchmarks.jl -- GC benchmarks test harness
 Usage:
-    run_benchmarks.jl (serial|multithreaded|slow|sandmark) (all|<category> [<name>]) [options]
+    run_benchmarks.jl (serial|multithreaded|slow) (all|<category> [<name>]) [options]
     run_benchmarks.jl -h | --help
     run_benchmarks.jl --version
 Options:
@@ -178,10 +178,8 @@ function main(args)
         cd("serial")
     elseif args["multithreaded"]
         cd("multithreaded")
-    elseif args["slow"]
+    else # slow
         cd("slow")
-    else # sandmark
-        cd("sandmark")
     end
 
     show_json = args["--json"]
