@@ -1,4 +1,5 @@
 # Temporary
+results.csv
 *.DS_Store
 *.swp
 *.jl.cov

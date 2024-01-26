@@ -50,6 +50,7 @@ There are three classes of benchmarks:
 |        | linked | list.jl | Small pointer-heavy data structure. |
 |        |        | tree.jl | Small pointer-heavy data structure. |
 |        | strings | strings.jl | |
+|        | forwarddiff | fdiff.jl| ForwardDiff matrix benchmark |
 | Multithreaded | binary_tree | tree_immutable.jl | Small pointer-heavy data structure. |
 |               |             | tree_mutable.jl | Small pointer-heavy data structure. |
 | Slow | rb\_tree | rb\_tree.jl | Pointer graph whose minimum linear arrangement has cost Θ(n²). |
