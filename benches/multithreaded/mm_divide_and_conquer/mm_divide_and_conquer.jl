@@ -1,4 +1,4 @@
-include(joinpath("..", "..", "..", "utils.jl"))
+include(joinpath("..", "..", "..", "util", "utils.jl"))
 
 function matrix_multiply(res, x, y)
     i_n = size(x, 1)

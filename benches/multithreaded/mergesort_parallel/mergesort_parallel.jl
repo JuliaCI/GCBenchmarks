@@ -1,4 +1,4 @@
-include(joinpath("..", "..", "..", "utils.jl"))
+include(joinpath("..", "..", "..", "util", "utils.jl"))
 
 const N = 32 * (1 << 20)
 const BUBBLE_SORT_THRESHOLD = 32

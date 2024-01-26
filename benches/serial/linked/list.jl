@@ -1,4 +1,4 @@
-include(joinpath("..", "..", "..", "utils.jl"))
+include(joinpath("..", "..", "..", "util", "utils.jl"))
 
 mutable struct ListNode
   key::Int64
