@@ -51,6 +51,9 @@ There are three classes of benchmarks:
 |        |        | tree.jl | Small pointer-heavy data structure. |
 |        | strings | strings.jl | |
 | Multithreaded | binary_tree | tree_immutable.jl | Small pointer-heavy data structure. |
-|               |             | tree_mutable.jl | Small pointer-heavy data structure. |
+|               |             | tree_mutable.jl   | Small pointer-heavy data structure. |
+|               | bigarrays   | objarray.jl     |  Large arrays with pointer elements |
+|               | small_array   | alloc_alot.jl  | Lots of malloc backed arrays |
+|               | bigint   | pollardt.jl  | Tests small `BigInt`s but threaded. |
 | Slow | rb\_tree | rb\_tree.jl | Pointer graph whose minimum linear arrangement has cost Θ(n²). |
 |      | pidigits.jl | Tests large `BigInt`s. |
