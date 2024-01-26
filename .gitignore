@@ -6,4 +6,5 @@
 *.jl.mem
 *~
 TAGS
-Manifest.toml
+*Manifest.toml
+results.csv
