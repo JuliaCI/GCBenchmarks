@@ -30,6 +30,7 @@ macro gctime(ex)
     quote
         $fc
         local result
+        GC.gc()
         local start_gc_num = Base.gc_num()
         local end_gc_num = start_gc_num
         local start_time = time_ns()
