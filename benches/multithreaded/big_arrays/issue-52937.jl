@@ -1,13 +1,10 @@
 include(joinpath("..", "..", "..", "util", "utils.jl"))
 
-using BenchmarkTools
-
 using Base.Threads: @threads
 using Random: shuffle
 
 function sample_vote!(_rb, chop_counts)
     pts = rand(length(chop_counts))
-
     N = length(_rb)
     _srt = 4245
     partialsortperm!(_rb, pts, 1:_srt; lt = <, rev = true)
@@ -18,9 +15,8 @@ function sample_vote!(_rb, chop_counts)
 end
 
 function parallel_scores(chop_counts)
-    for k ∈ 1:8 # @threads in real code, but not needed for mwe. do need -t8 though
+    @threads for i in 1:8
         _rb = collect(1:length(chop_counts))
-
         # the bigger this number, the more % GC time
         for _ ∈ 1:1000
             sample_vote!(_rb, chop_counts)
@@ -30,5 +26,4 @@ end
 
 # kind of arbitrary, but approximates my data
 chop_counts = shuffle(trunc.(Int, 6500 ./ (50:100_000)))
-
 @gctime parallel_scores(chop_counts)
