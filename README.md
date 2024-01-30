@@ -49,8 +49,14 @@ There are three classes of benchmarks:
 |        | bigint | pollard.jl | Tests small `BigInt`s. |
 |        | linked | list.jl | Small pointer-heavy data structure. |
 |        |        | tree.jl | Small pointer-heavy data structure. |
-|        | strings | strings.jl | |
+|        | strings | strings.jl | Exercises fragmentation through repeated allocation of short multi-sized strings. |
+|        | big_arrays | many_refs.jl | Forces a mark-phase traversal through a large array of pointers (all distinct).  |
+|        | big_arrays | single_ref.jl | Forces a mark-phase traversal through a large array of pointers (all the same).  |
 | Multithreaded | binary_tree | tree_immutable.jl | Small pointer-heavy data structure. |
 |               |             | tree_mutable.jl | Small pointer-heavy data structure. |
+|               | mergesort_parallel | mergesort_parallel.jl | Parallel merge-sort. |
+|               | mm_divide_and_conquer | mm_divide_and_conquer.jl | Divide-and-conquer matrix multiply. |
+|               | big_arrays | objarray.jl | Allocates large arrays of boxed objects, each containing a small number of references. |
+|               | big_arrays | issue-52937.jl | Parallel allocation of arrays of immutable types. |
 | Slow | rb\_tree | rb\_tree.jl | Pointer graph whose minimum linear arrangement has cost Θ(n²). |
-|      | pidigits.jl | Tests large `BigInt`s. |
+|      | pidigits | pidigits.jl | Tests large `BigInt`s. |
