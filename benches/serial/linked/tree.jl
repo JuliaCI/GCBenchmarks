@@ -40,7 +40,7 @@ function sumTree(n::TreeNode)
 end
 
 # tree_size is the number of elements in mb
-function tree(n=4)
+function tree(n=32)
     n *= 1024^2
     rng = Xoshiro(12345)
     temp = rand(rng, Int, n)
