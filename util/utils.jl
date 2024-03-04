@@ -10,19 +10,17 @@ function gc_cb_on_pressure()
     thrashing_stamps[idx[] % 3 + 1] = t
     idx[] += 1
     if idx[] >= 3
-        # three thrashing stamps in three seconds: abort
-        if t - thrashing_stamps[idx[] % 3 + 1] <= 3_000_000_000
+        # three thrashing stamps in ten seconds: abort
+        if t - thrashing_stamps[idx[] % 3 + 1] <= 10_000_000_000
             @ccall abort()::Cvoid
         end
     end
     nothing
 end
 
-if VERSION >= v"1.11-DEV.0"
-    @info "Setting GC memory pressure callback"
-    ccall(:jl_gc_set_cb_notify_gc_pressure, Cvoid, (Ptr{Cvoid}, Cint),
-        @cfunction(gc_cb_on_pressure, Cvoid, ()), true)
-end
+@info "Setting GC memory pressure callback"
+ccall(:jl_gc_set_cb_notify_gc_pressure, Cvoid, (Ptr{Cvoid}, Cint),
+    @cfunction(gc_cb_on_pressure, Cvoid, ()), true)
 
 macro gctime(ex)
     fc = isdefined(Base.Experimental, Symbol("@force_compile")) ?
