@@ -18,11 +18,11 @@ function plot_results(table; log2_axes = true, violin = true)
 	for (file, bench) in pairs(benches)
 		mean_data = Any[]
 		for (gcthreads, t) in pairs(TypedTables.group(getproperty(:gcthreads), bench))
-			push!(mean_data, (; file, gcthreads, mark_time = mean(t.mark_time), threads=first(t.threads)))
+			push!(mean_data, (; file, gcthreads, gc_time = mean(t.gc_time), threads=first(t.threads)))
 		end
 		mean_table = Table(row for row in mean_data)
-		t0 = filter(r -> r.gcthreads == 1, mean_table).mark_time
-		speedup = t0 ./ mean_table.mark_time
+		t0 = filter(r -> r.gcthreads == 1, mean_table).gc_time
+		speedup = t0 ./ mean_table.gc_time
 		mean_table = Table(mean_table; speedup)
 
 		Label(f[idx, 1:2, Top()], 
@@ -33,14 +33,14 @@ function plot_results(table; log2_axes = true, violin = true)
 		scatterlines!(ax, mean_table.gcthreads, mean_table.speedup)
 		lines!(ax, mean_table.gcthreads, mean_table.gcthreads, color=:lightblue)
 
-		ax = Axis(f[idx, 2]; title="Mark times (ms)", kwargs...)
+		ax = Axis(f[idx, 2]; title="GC times (ms)", kwargs...)
 		gcthreads = bench.gcthreads
-		mark_times = bench.mark_time ./ 1_000_000
+		gc_times = bench.gc_time ./ 1_000_000
 		if violin
-			violin!(ax, gcthreads, mark_times;
+			violin!(ax, gcthreads, gc_times;
 				show_median=true)
 		else
-			rainclouds!(ax,gcthreads, mark_times;
+			rainclouds!(ax,gcthreads, gc_times;
 				orientation = :vertical, clouds=hist, cloud_width=0.5)
 		end
 	
