@@ -77,9 +77,17 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
     gc_times =  extract(gc_end, gc_start, :total_time)
     mark_times = extract(gc_end, gc_start, :total_mark_time)
     sweep_times = extract(gc_end, gc_start, :total_sweep_time)
-    times_to_safepoint = extract(gc_end, gc_start, :total_time_to_safepoint)
-    ncollect = extract(gc_end, gc_start, :collect)
-    nfull_sweep = extract(gc_end, gc_start, :full_sweep)
+    # 1.9 and before don't have these fields, so default to 0
+    @static if VERSION < v"1.10.0-DEV.0"
+        times_to_safepoint = zeros(runs)
+        ncollect = zeros(runs)
+        nfull_sweep = zeros(runs)
+    else
+        times_to_safepoint = extract(gc_end, gc_start, :total_time_to_safepoint)
+        ncollect = extract(gc_end, gc_start, :collect)
+        nfull_sweep = extract(gc_end, gc_start, :full_sweep)
+    end
+    max_memory = extract(gc_end, gc_start, :max_memory)
 
     data = Table(
         time = times,
@@ -89,6 +97,7 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
         time_to_safepoint = times_to_safepoint,
         ncollections = ncollect,
         nfull_sweeps = nfull_sweep,
+        max_memory = max_memory,
         file = [file for _ in 1:runs],
         threads = [threads for _ in 1:runs],
         gcthreads = [gcthreads for _ in 1:runs],
