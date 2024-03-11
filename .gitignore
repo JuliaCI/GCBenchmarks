@@ -1,6 +1,7 @@
 # Temporary
 *.DS_Store
 *.swp
+*.tex
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
@@ -9,3 +10,4 @@ TAGS
 *Manifest.toml
 results.csv
 .vscode
+plot.png

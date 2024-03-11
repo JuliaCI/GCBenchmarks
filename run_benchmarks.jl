@@ -62,7 +62,7 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
     for _ in 1:runs
         # uglyness to communicate over non stdout (specifically file descriptor 3)
         p = Base.PipeEndpoint()
-        _gcthreads = gcthreads == 0 ? `` : `--gcthreads=$gcthreads`
+        _gcthreads = `--gcthreads=$gcthreads`
         cmd = `$JULIAVER --project=. --threads=$threads $_gcthreads $file SERIALIZE`
         cmd = run(Base.CmdRedirect(cmd, p, 3), stdin, stdout, stderr, wait=false)
         r = deserialize(p)
@@ -133,7 +133,7 @@ end
 function run_category_files(benches, args, show_json = false)
     local runs = parse(Int, args["--runs"])
     local threads = parse(Int, args["--threads"])
-    local gcthreads = parse(Int, args["--gcthreads"])
+    local gcthreads = args["--gcthreads"]
     local max = if isnothing(args["--scale"]) 0 else parse(Int, args["--scale"]) end
     for bench in benches
         if !show_json
