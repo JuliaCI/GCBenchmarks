@@ -1,5 +1,6 @@
 # Temporary
 *.DS_Store
+*.tex
 *.swp
 *.jl.cov
 *.jl.*.cov
