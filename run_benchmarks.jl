@@ -6,7 +6,7 @@ Usage:
 Options:
     -n <runs>, --runs=<runs>              Number of runs for each benchmark [default: 10].
     -t <threads>, --threads=<threads>     Number of threads to use [default: 1].
-    -g <threads>, --gcthreads=<threads>   Number of GC threads to use [default: 0]. 
+    -g <threads>, --gcthreads=<threads>   Number of GC threads to use [default: 0].
     -s <max>, --scale=<max>               Maximum number of gcthreads for scaling test.
     -h, --help                            Show this screen.
     --version                             Show version.
@@ -77,6 +77,7 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
     gc_times =  extract(gc_end, gc_start, :total_time)
     mark_times = extract(gc_end, gc_start, :total_mark_time)
     sweep_times = extract(gc_end, gc_start, :total_sweep_time)
+    stack_sweep_times = extract(gc_end, gc_start, :total_stack_pool_sweep_time)
     times_to_safepoint = extract(gc_end, gc_start, :total_time_to_safepoint)
     ncollect = extract(gc_end, gc_start, :collect)
     nfull_sweep = extract(gc_end, gc_start, :full_sweep)
@@ -86,6 +87,7 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
         gc_time = gc_times,
         mark_time = mark_times,
         sweep_time = sweep_times,
+        stack_sweep_time = stack_sweep_times,
         time_to_safepoint = times_to_safepoint,
         ncollections = ncollect,
         nfull_sweeps = nfull_sweep,
@@ -101,14 +103,15 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
     gc_time =  get_stats(gc_times) ./ 1_000_000
     mark_time = get_stats(mark_times) ./ 1_000_000
     sweep_time = get_stats(sweep_times) ./ 1_000_000
+    stack_sweep_time = get_stats(stack_sweep_times) ./ 1_000_000
     time_to_safepoint = get_stats(times_to_safepoint) ./ 1_000
 
     max_pause = get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000
     max_mem = get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2
     pct_gc = get_stats(map((t,stat)->(stat.total_time/t), times, gc_diff)) .* 100
 
-    header = (["", "total time", "gc time", "mark time", "sweep time", "max GC pause", "time to safepoint", "max heap", "percent gc"],
-              ["", "ms",         "ms",       "ms",          "ms",       "ms",          "us",                "MB",       "%"        ])
+    header = (["", "total time", "gc time", "mark time", "sweep time", "stack sweep time", "max GC pause", "time to safepoint", "max heap", "percent gc"],
+              ["", "ms",         "ms",       "ms",          "ms",            "ms",             "ms",          "us",                "MB",       "%"        ])
     labels = ["minimum", "median", "maximum", "stdev"]
     highlighters = highlight_col(6, 10, 100) # max pause
     append!(highlighters, highlight_col(7, 1, 10)) # time to safepoint
@@ -119,13 +122,14 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
                      ("gc time", gc_time),
                      ("mark time", mark_time),
                      ("sweep time", sweep_time),
+                     ("stack sweep time", stack_sweep_time),
                      ("max pause", max_pause),
                      ("ttsp", time_to_safepoint),
                      ("max memory", max_mem),
                      ("pct gc", pct_gc)])
         JSON.print(data)
     else
-        data = hcat(labels, total_stats, gc_time, mark_time, sweep_time, max_pause, time_to_safepoint, max_mem, pct_gc)
+        data = hcat(labels, total_stats, gc_time, mark_time, sweep_time, stack_sweep_time, max_pause, time_to_safepoint, max_mem, pct_gc)
         pretty_table(data; header, formatters=ft_printf("%0.0f"), highlighters)
     end
 end
