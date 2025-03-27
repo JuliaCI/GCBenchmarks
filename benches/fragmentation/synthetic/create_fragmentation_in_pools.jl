@@ -44,10 +44,10 @@ const SIZE_CLASSES_FROM_JL_STOCK_GC = vcat(
 # Vector of vectors... each individual vector will contain pointers to pool-allocated objects
 const PTRS_TO_POOLED_OBJECTS = [Vector{Any}() for _ in SIZE_CLASSES_FROM_JL_STOCK_GC]
 
-# We will allocate 1MB worth of objects per pool
-const NUM_ALLOCATED_BYTES_PER_POOL = 1 * 1024 * 1024
+# Allocate 16MB worth of objects per pool/size class
+const NUM_ALLOCATED_BYTES_PER_POOL = 32 * 1024 * 1024
 
-# Let's create a parameterized tuple to artificially create objects of different sizes
+# `N` will control the size of the struct, so that we artificially create objects of different sizes
 mutable struct PooledObject{N}
     some_header::UInt64
     data::NTuple{N,UInt8}
@@ -57,7 +57,7 @@ mutable struct PooledObject{N}
     end
 end
 
-# Yeah, this is quite pedestrian, but doesn't matter for this MWE
+# Yeah, this is quite pedestrian, but doesn't matter for this benchmark
 function find_struct_param_for_size(size)
     max_n = (1 << 32) - 1
     for n = 0:max_n
