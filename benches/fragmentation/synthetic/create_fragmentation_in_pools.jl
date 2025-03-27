@@ -1,3 +1,5 @@
+include(joinpath("..", "..", "..", "util", "utils.jl"))
+
 @static if VERSION < v"1.12.0-DEV.0"
     error("This script requires Julia 1.12 or later")
 end
@@ -68,9 +70,7 @@ end
 
 function allocate_a_bunch_of_pooled_objects()
     for (i, size) in enumerate(SIZE_CLASSES_FROM_JL_STOCK_GC)
-        @info "Allocating objects of size $size"
         n = find_struct_param_for_size(size)
-        @info "Found struct parameter: $n"
         @assert n != -1
         nobjs = NUM_ALLOCATED_BYTES_PER_POOL / size
         for _ = 1:nobjs
@@ -108,4 +108,4 @@ function main()
     pretty_print_page_utilization_data()
 end
 
-main()
+@gctime main()
