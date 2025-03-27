@@ -1,14 +1,7 @@
-"""
-    "inference" => InferenceBenchmarks
+include(joinpath("..", "..", "..", "util", "utils.jl"))
 
-Defines a benchmark suite for Julia-level compilation pipeline.
-Note that this benchmark suite is only available for Julia 1.10 and higher.
+# InferenceBenchmarks taken from BaseBenchmarks.jl (https://github.com/JuliaCI/BaseBenchmarks.jl)
 
-This benchmark group `"inference"` is composed of the following subgroups:
-- `"allinference"`: benchmarks the overall Julia-level compilation pipeline for a static call graph
-- `"abstract interpretation"`: benchmarks abstract interpretation for a static call graph (without optimization)
-- `"optimization"`: benchmarks optimization passes applied for a single call frame
-"""
 module InferenceBenchmarks
 
 # InferenceBenchmarker
@@ -281,46 +274,52 @@ let # check performance of opaque closure handling
     end
 end
 
-# abstract interpretation
-@abs_call sin(42)
-@abs_call rand(Float64)
-abs_call(println, (QuoteNode,))
-abs_call(broadcasting, (Vector{Float64},Float64))
-abs_call(completions, (String,Int))
-abs_call(Base.init_stdio, (Ptr{Cvoid},))
-abs_call(many_local_vars, (Int,))
-abs_call(many_method_matches, (Vector{Float64},))
-abs_call(many_const_calls)
-abs_call(many_global_refs, (Int,))
-abs_call(many_invoke_calls, (Vector{Float64},))
-abs_call(many_opaque_closures, (Vector{Float64},))
 
-# optimization
-@opt_call sin(42)
-@opt_call rand(Float64)
-opt_call(println, (QuoteNode,))
-opt_call(broadcasting, (Vector{Float64},Float64))
-opt_call(completions, (String,Int))
-opt_call(Base.init_stdio, (Ptr{Cvoid},))
-opt_call(many_local_vars, (Int,))
-opt_call(many_method_matches, (Vector{Float64},))
-opt_call(many_const_calls)
-opt_call(many_global_refs, (Int,))
-opt_call(many_invoke_calls, (Vector{Float64},))
-opt_call(many_opaque_closures, (Vector{Float64},))
-
-# all inference
-@inf_call sin(42)
-@inf_call rand(Float64)
-inf_call(println, (QuoteNode,))
-inf_call(broadcasting, (Vector{Float64},Float64))
-inf_call(completions, (String,Int))
-inf_call(Base.init_stdio, (Ptr{Cvoid},))
-inf_call(many_local_vars, (Int,))
-inf_call(many_method_matches, (Vector{Float64},))
-inf_call(many_const_calls)
-inf_call(many_global_refs, (Int,))
-inf_call(many_invoke_calls, (Vector{Float64},))
-inf_call(many_opaque_closures, (Vector{Float64},))
+function run_all_benchmarks()
+    # abstract interpretation
+    @abs_call sin(42)
+    @abs_call rand(Float64)
+    abs_call(println, (QuoteNode,))
+    abs_call(broadcasting, (Vector{Float64},Float64))
+    abs_call(completions, (String,Int))
+    abs_call(Base.init_stdio, (Ptr{Cvoid},))
+    abs_call(many_local_vars, (Int,))
+    abs_call(many_method_matches, (Vector{Float64},))
+    abs_call(many_const_calls)
+    abs_call(many_global_refs, (Int,))
+    abs_call(many_invoke_calls, (Vector{Float64},))
+    abs_call(many_opaque_closures, (Vector{Float64},))
+    # optimization
+    @opt_call sin(42)
+    @opt_call rand(Float64)
+    opt_call(println, (QuoteNode,))
+    opt_call(broadcasting, (Vector{Float64},Float64))
+    opt_call(completions, (String,Int))
+    opt_call(Base.init_stdio, (Ptr{Cvoid},))
+    opt_call(many_local_vars, (Int,))
+    opt_call(many_method_matches, (Vector{Float64},))
+    opt_call(many_const_calls)
+    opt_call(many_global_refs, (Int,))
+    opt_call(many_invoke_calls, (Vector{Float64},))
+    opt_call(many_opaque_closures, (Vector{Float64},))
+    # all inference
+    @inf_call sin(42)
+    @inf_call rand(Float64)
+    inf_call(println, (QuoteNode,))
+    inf_call(broadcasting, (Vector{Float64},Float64))
+    inf_call(completions, (String,Int))
+    inf_call(Base.init_stdio, (Ptr{Cvoid},))
+    inf_call(many_local_vars, (Int,))
+    inf_call(many_method_matches, (Vector{Float64},))
+    inf_call(many_const_calls)
+    inf_call(many_global_refs, (Int,))
+    inf_call(many_invoke_calls, (Vector{Float64},))
+    inf_call(many_opaque_closures, (Vector{Float64},))
+    return nothing
+end
 
 end # module InferenceBenchmarks
+
+using .InferenceBenchmarks
+
+@gctime InferenceBenchmarks.run_all_benchmarks()
