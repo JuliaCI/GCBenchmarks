@@ -20,7 +20,7 @@ function find_min_size(bench_path)
         @info "Attempting heap size $(heap_size)MB"
         proc = run(
             pipeline(
-                `$(Base.julia_cmd()) --project=$(bench_path_parent) --heap-size-hint=$(heap_size)M $bench_path`,
+                `$(Base.julia_cmd()) --project=$(bench_path_parent) --hard-heap-limit=$(heap_size)M --gc-sweep-always-full $bench_path`,
                 stdout = stdout,
                 stderr = stderr,
             );
