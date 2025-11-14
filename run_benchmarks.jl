@@ -31,18 +31,6 @@ function get_stats(times::Vector)
     return [minimum(times), median(times), maximum(times), std(times)]
 end
 
-"""
-    Highlights cells in a column based on value
-        green if less than lo
-        yellow if between lo and hi
-        red if above hi
-"""
-function highlight_col(col, lo, hi)
-    [Highlighter((data,i,j) -> (j == col) && data[i, j] <= lo; foreground=:green),
-     Highlighter((data,i,j) -> (j == col) && lo < data[i, j] < hi; foreground=:yellow),
-     Highlighter((data,i,j) -> (j == col) && hi <= data[i, j]; foreground=:red),]
-end
-
 function diff(gc_end, gc_start, p)
     v0 = getproperty(gc_start, p)
     v1 = getproperty(gc_end, p)
@@ -110,10 +98,6 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
     header = (["", "total time", "gc time", "mark time", "sweep time", "max GC pause", "time to safepoint", "max heap", "percent gc"],
               ["", "ms",         "ms",       "ms",          "ms",       "ms",          "us",                "MB",       "%"        ])
     labels = ["minimum", "median", "maximum", "stdev"]
-    highlighters = highlight_col(6, 10, 100) # max pause
-    append!(highlighters, highlight_col(7, 1, 10)) # time to safepoint
-    append!(highlighters, highlight_col(9, 10, 50)) # pct gc
-    highlighters = Tuple(highlighters)
     if show_json
         data = Dict([("total time", total_stats),
                      ("gc time", gc_time),
@@ -126,7 +110,7 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
         JSON.print(data)
     else
         data = hcat(labels, total_stats, gc_time, mark_time, sweep_time, max_pause, time_to_safepoint, max_mem, pct_gc)
-        pretty_table(data; header, formatters=ft_printf("%0.0f"), highlighters)
+        pretty_table(data; header, formatters=ft_printf("%0.0f"))
     end
 end
 
