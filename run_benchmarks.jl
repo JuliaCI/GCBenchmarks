@@ -44,8 +44,8 @@ function highlight_col(col, lo, hi)
 end
 
 function diff(gc_end, gc_start, p)
-    v0 = getproperty(gc_start, p)
-    v1 = getproperty(gc_end, p)
+    v0 = hasproperty(gc_start, p) ? getproperty(gc_start, p) : 0
+    v1 = hasproperty(gc_end, p) ? getproperty(gc_end, p) : 0
     v1-v0
 end
 
