@@ -65,7 +65,13 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
         _gcthreads = gcthreads == 0 ? `` : `--gcthreads=$gcthreads`
         cmd = `$JULIAVER --project=. --threads=$threads $_gcthreads $file SERIALIZE`
         cmd = run(Base.CmdRedirect(cmd, p, 3), stdin, stdout, stderr, wait=false)
-        r = deserialize(p)
+        r = try
+            deserialize(p)
+        catch
+            wait(cmd)
+            @warn "Benchmark run died (exit code $(cmd.exitcode), signal $(cmd.termsignal)); skipping run" file
+            continue
+        end
         @assert success(cmd)
         # end uglyness
         push!(value, r.value)
@@ -73,6 +79,10 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
         push!(gc_diff, r.gc_diff)
         push!(gc_end, r.gc_end)
         push!(gc_start, r.gc_start)
+    end
+    if isempty(times)
+        @warn "All runs of benchmark failed; no results" file
+        return
     end
     gc_times =  extract(gc_end, gc_start, :total_time)
     mark_times = extract(gc_end, gc_start, :total_mark_time)
