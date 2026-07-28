@@ -56,7 +56,12 @@ macro gctime(ex)
                 times = (end_time - start_time),
                 gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
                 gc_start = start_gc_num,
-                gc_end = end_gc_num
+                gc_end = end_gc_num,
+                # Peak RSS as the OS saw it (getrusage ru_maxrss), which unlike
+                # the GC's own `max_memory` accounting includes everything the
+                # process actually paid for: code, stacks, malloc'd memory, and
+                # any heap the GC mapped but did not charge itself.
+                maxrss = Sys.maxrss()
             )
         catch e
             @show e
@@ -65,7 +70,8 @@ macro gctime(ex)
                 times = NaN,
                 gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
                 gc_start = start_gc_num,
-                gc_end = end_gc_num
+                gc_end = end_gc_num,
+                maxrss = Sys.maxrss()
             )
         end
 
