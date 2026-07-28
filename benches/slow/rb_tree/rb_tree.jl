@@ -66,7 +66,14 @@ struct PointByY
 end
 Base.isless(a::PointByY, b::PointByY) = isless(a.p.y, b.p.y)
 
-function tvbench(; N = 50_000_000)
+# Number of live points held in the indexes. The default is scaled down from the
+# original 50M so a run takes minutes rather than ~20; at 10M the live set is
+# still >1 GB of Point plus red-black-tree nodes, far beyond any cache or TLB, so
+# the poor mark locality this benchmark exists to measure is unaffected. Set
+# GCBENCH_RB_TREE_N to run the original scale.
+const RB_TREE_N = parse(Int, get(ENV, "GCBENCH_RB_TREE_N", "10000000"))
+
+function tvbench(; N = RB_TREE_N)
     t0 = time()
     queue = Queue{Point}()
     xtree = RBTree{PointByX}()

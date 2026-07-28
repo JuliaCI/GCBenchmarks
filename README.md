@@ -44,6 +44,11 @@ There are five classes of benchmarks:
 
   `julia --project=. run_benchmarks.jl slow rb_tree rb_tree -n 1 --gcthreads 4`
 
+- Run the red-black tree benchmark at its original 50M-point scale (roughly 20
+  minutes per run instead of a few):
+
+  `GCBENCH_RB_TREE_N=50000000 julia --project=. run_benchmarks.jl slow rb_tree rb_tree -n 1`
+
 ## The benchmarks
 
 | Class | Category | Name | Description |
