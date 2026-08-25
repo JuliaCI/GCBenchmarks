@@ -1,5 +1,4 @@
 name: GCBenchmarks
-
 on:
   push:
     branches: [main]
