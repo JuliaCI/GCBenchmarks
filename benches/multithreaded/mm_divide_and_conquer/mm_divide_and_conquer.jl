@@ -64,7 +64,7 @@ function matrix_multiply_recursive(res, x, y)
     end
 end
 
-const M_SIZE = (1 << 12)
+const M_SIZE = 1 << max(8, scaled_log2(12))
 
 function main_recursive()
     m1 = rand(1:100, M_SIZE, M_SIZE)

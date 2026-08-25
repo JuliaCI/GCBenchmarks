@@ -34,7 +34,10 @@ jobs:
       - name: Instantiate
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.build()'
       - name: Run benchmarks ${{ matrix.benchmark }}
-        run: julia --threads=auto --project=. run_benchmarks.jl ${{ matrix.benchmark }} ${{ matrix.category }}
+        # CI is a smoke test: one run per benchmark at a fraction of the full workload.
+        env:
+          GCBENCH_SCALE: "0.05"
+        run: julia --threads=auto --project=. run_benchmarks.jl --runs=1 ${{ matrix.benchmark }} ${{ matrix.category }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

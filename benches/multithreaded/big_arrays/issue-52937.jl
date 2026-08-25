@@ -18,7 +18,7 @@ function parallel_scores(chop_counts)
     @threads for i in 1:8
         _rb = collect(1:length(chop_counts))
         # the bigger this number, the more % GC time
-        for _ ∈ 1:1000
+        for _ ∈ 1:scaled(1000)
             sample_vote!(_rb, chop_counts)
         end
     end

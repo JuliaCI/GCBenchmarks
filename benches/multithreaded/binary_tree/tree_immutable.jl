@@ -49,4 +49,4 @@ end #module
 
 using .BinaryTreeImmutable
 
-@gctime BinaryTreeImmutable.binary_trees(devnull, 21)
+@gctime BinaryTreeImmutable.binary_trees(devnull, max(6, scaled_log2(21)))

@@ -121,4 +121,4 @@ function test(n)
    return 6847
 end
 
-@gctime test(1024 * 1024 * 8)
+@gctime test(scaled(1024 * 1024 * 8))

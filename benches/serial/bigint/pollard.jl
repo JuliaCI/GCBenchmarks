@@ -36,4 +36,5 @@ function pollardfactor(n::T=big(1208925819691594988651321)) where T<:Integer
     end
 end
 
-@gctime pollardfactor()
+# a much smaller semiprime for smoke runs
+@gctime pollardfactor(SCALE < 1 ? big(1000000007) * big(998244353) : big(1208925819691594988651321))
