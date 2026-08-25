@@ -2,6 +2,14 @@ using Pkg
 Pkg.instantiate() # It is dumb that I have to do this
 using Serialization
 
+# Workload scaling. GCBENCH_SCALE=1 (default) runs the full benchmark; CI sets a
+# small value so the suite finishes quickly and fits in a hosted runner. Numbers
+# produced with SCALE != 1 are only a smoke test, not comparable perf results.
+const SCALE = parse(Float64, get(ENV, "GCBENCH_SCALE", "1"))
+scaled(n::Integer) = max(1, round(Int, n * SCALE))
+# for sizes that must stay a power of two / tree depths: shift the exponent instead
+scaled_log2(k::Integer) = max(0, k + floor(Int, log2(SCALE)))
+
 idx = Ref{Int}(0)
 thrashing_stamps = zeros(UInt64, 3)
 

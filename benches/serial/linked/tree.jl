@@ -51,4 +51,4 @@ function tree(n=8)
     return sumTree(root)
 end
 
-@gctime tree()
+@gctime tree(scaled(8))

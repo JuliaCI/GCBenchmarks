@@ -1,6 +1,6 @@
 include(joinpath("..", "..", "..", "util", "utils.jl"))
 
-const N = 32 * (1 << 20)
+const N = 1 << scaled_log2(25)  # 32 * 2^20 at full scale
 const BUBBLE_SORT_THRESHOLD = 32
 
 using Random

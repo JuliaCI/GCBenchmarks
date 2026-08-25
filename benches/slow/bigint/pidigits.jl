@@ -40,4 +40,4 @@ function pidigits(N=68470)
     end
 end
 
-@gctime pidigits()
+@gctime pidigits(scaled(68470))

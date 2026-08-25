@@ -1,0 +1,46 @@
+name: GCBenchmarks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    name: Julia ${{ matrix.version }} -- ${{ matrix.benchmark }} -- ${{ matrix.category }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    if: "!contains(github.event.head_commit.message, '[skip tests]')"
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ["nightly"]
+        benchmark: ["serial", "multithreaded"]
+        category: ["all"]
+        include:
+          - version: "nightly"
+            benchmark: "slow"
+            category: "bigint"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.version }}
+      - uses: julia-actions/cache@v2
+      - name: Instantiate
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.build()'
+      - name: Run benchmarks ${{ matrix.benchmark }}
+        # CI is a smoke test: one run per benchmark at a fraction of the full workload.
+        env:
+          GCBENCH_SCALE: "0.05"
+        run: julia --threads=auto --project=. run_benchmarks.jl --runs=1 ${{ matrix.benchmark }} ${{ matrix.category }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-${{ matrix.version }}-${{ matrix.benchmark }}-${{ matrix.category }}
+          path: results.csv
+          if-no-files-found: ignore

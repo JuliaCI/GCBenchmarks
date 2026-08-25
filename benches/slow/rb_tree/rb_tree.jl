@@ -115,4 +115,4 @@ function tvbench(; N = 50_000_000)
     end
 end
 
-@gctime tvbench()
+@gctime tvbench(N = scaled(50_000_000))

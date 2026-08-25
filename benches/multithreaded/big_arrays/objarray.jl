@@ -27,7 +27,7 @@ end
 
 function run(maxsize)
     Threads.@threads for i in 1:maxsize
-        work(i*1000)
+        work(i*scaled(1000))
     end
 end
 

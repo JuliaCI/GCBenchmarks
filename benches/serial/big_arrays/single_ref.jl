@@ -22,7 +22,7 @@ end #module
 using .SingleRef
 
 const GB = 1<<30
-const MAX_MEMORY = round(Int, 0.8 * GB)
+const MAX_MEMORY = round(Int, 0.8 * GB * SCALE)
 const array_length = div(MAX_MEMORY, sizeof(Ptr{C_NULL}))
 
 @gctime SingleRef.construct(array_length)

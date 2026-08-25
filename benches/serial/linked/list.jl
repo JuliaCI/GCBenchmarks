@@ -17,5 +17,5 @@ function list(n=128)
     return current.key
 end
 
-@gctime list()
+@gctime list(scaled(128))
 
