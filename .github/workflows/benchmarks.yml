@@ -14,14 +14,19 @@ jobs:
     name: Julia ${{ matrix.version }} -- ${{ matrix.benchmark }} -- ${{ matrix.category }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    # nightly may break; only the release version is required to pass
+    continue-on-error: ${{ matrix.version == 'nightly' }}
     if: "!contains(github.event.head_commit.message, '[skip tests]')"
     strategy:
       fail-fast: false
       matrix:
-        version: ["nightly"]
+        version: ["1", "nightly"]
         benchmark: ["serial", "multithreaded"]
         category: ["all"]
         include:
+          - version: "1"
+            benchmark: "slow"
+            category: "bigint"
           - version: "nightly"
             benchmark: "slow"
             category: "bigint"
