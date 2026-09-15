@@ -15,18 +15,24 @@ thrashing_stamps = zeros(UInt64, 3)
 
 function gc_cb_on_pressure()
     t = time_ns()
+    # Once the GC's thrashing estimator trips, it notifies on every collection,
+    # so notifications less than 1s apart are one episode: only count the first.
+    if idx[] > 0 && t - thrashing_stamps[(idx[] - 1) % 3 + 1] < 1_000_000_000
+        return nothing
+    end
     thrashing_stamps[idx[] % 3 + 1] = t
     idx[] += 1
     if idx[] >= 3
-        # three thrashing stamps in ten seconds: abort
+        # three distinct thrashing episodes in ten seconds: abort
         if t - thrashing_stamps[idx[] % 3 + 1] <= 10_000_000_000
-            @ccall abort()::Cvoid
+            print(stderr, "GCBenchmarks: GC thrashing detected (3 pressure episodes in 10s), aborting benchmark\n")
+            exit(1)
         end
     end
     nothing
 end
 
-@info "Setting GC memory pressure callback"
+@debug "Setting GC memory pressure callback"
 ccall(:jl_gc_set_cb_notify_gc_pressure, Cvoid, (Ptr{Cvoid}, Cint),
     @cfunction(gc_cb_on_pressure, Cvoid, ()), true)
 
@@ -50,7 +56,12 @@ macro gctime(ex)
                 times = (end_time - start_time),
                 gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
                 gc_start = start_gc_num,
-                gc_end = end_gc_num
+                gc_end = end_gc_num,
+                # Peak RSS as the OS saw it (getrusage ru_maxrss), which unlike
+                # the GC's own `max_memory` accounting includes everything the
+                # process actually paid for: code, stacks, malloc'd memory, and
+                # any heap the GC mapped but did not charge itself.
+                maxrss = Sys.maxrss()
             )
         catch e
             @show e
@@ -59,7 +70,8 @@ macro gctime(ex)
                 times = NaN,
                 gc_diff = Base.GC_Diff(end_gc_num, start_gc_num),
                 gc_start = start_gc_num,
-                gc_end = end_gc_num
+                gc_end = end_gc_num,
+                maxrss = Sys.maxrss()
             )
         end
 
