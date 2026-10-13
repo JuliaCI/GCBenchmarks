@@ -3,32 +3,36 @@
 This package contains various test programs which measure the efficiency of Garbage
 Collection (GC) in Julia.
 
+
 ## Running
 
 ```
 Usage:
-    run_benchmarks.jl (serial|multithreaded|slow) (all|<category> [<name>]) [options]
+    run_benchmarks.jl (serial|multithreaded|compiler|fragmentation|slow) (all|<category> [<name>]) [options]
     run_benchmarks.jl -h | --help
     run_benchmarks.jl --version
 Options:
     -n <runs>, --runs=<runs>              Number of runs for each benchmark [default: 10].
-    -t <threads>, --threads=<threads>     Number of mutator threads to use [default: 1].
-    --gcthreasds=<gcthreads>              Number of GC threads to use [default: 1].
-    -s <max>, --scale=<max>               Maximum number of GC threads for scaling test.
+    -t <threads>, --threads=<threads>     Number of threads to use [default: 1].
+    -g <threads>, --gcthreads=<threads>   Number of GC threads to use [default: 0].
+    -s <max>, --scale=<max>               Maximum number of gcthreads for scaling test.
     -h, --help                            Show this screen.
     --version                             Show version.
+    --json                                Serializes output to `json` file
 ```
 
 ## Classes
 
-There are three classes of benchmarks:
+There are five classes of benchmarks:
 - *Serial* benchmarks run on a single mutator thread.
 - *Multithreaded* benchmarks may run on multiple mutator threads.
-- *Slow* benchmarks are long-running in comparison with the other two classes.
+- *Compiler* benchmarks exercise allocation patterns of the Julia compiler.
+- *Fragmentation* benchmarks stress heap fragmentation.
+- *Slow* benchmarks are long-running in comparison with the other classes.
 
 ## Examples
 
-- Run all serial benchmarks 5 times each using 1 mutator thread and 1 GC thread:
+- Run all serial benchmarks 5 times each using 1 mutator thread and the default GC threads:
 
   `julia --project=. run_benchmarks.jl serial all -n 5`
 
@@ -40,6 +44,11 @@ There are three classes of benchmarks:
 
   `julia --project=. run_benchmarks.jl slow rb_tree rb_tree -n 1 --gcthreads 4`
 
+- Run the red-black tree benchmark at its original 50M-point scale (roughly 20
+  minutes per run instead of a few):
+
+  `GCBENCH_RB_TREE_N=50000000 julia --project=. run_benchmarks.jl slow rb_tree rb_tree -n 1`
+
 ## The benchmarks
 
 | Class | Category | Name | Description |
@@ -50,13 +59,15 @@ There are three classes of benchmarks:
 |        | linked | list.jl | Small pointer-heavy data structure. |
 |        |        | tree.jl | Small pointer-heavy data structure. |
 |        | strings | strings.jl | Exercises fragmentation through repeated allocation of short multi-sized strings. |
-|        | big_arrays | many_refs.jl | Forces a mark-phase traversal through a large array of pointers (all distinct).  |
-|        | big_arrays | single_ref.jl | Forces a mark-phase traversal through a large array of pointers (all the same).  |
+|        | big_arrays | many_refs.jl | Forces a mark-phase traversal through a large array of pointers (all distinct). |
+|        | big_arrays | single_ref.jl | Forces a mark-phase traversal through a large array of pointers (all the same). |
 | Multithreaded | binary_tree | tree_immutable.jl | Small pointer-heavy data structure. |
 |               |             | tree_mutable.jl | Small pointer-heavy data structure. |
 |               | mergesort_parallel | mergesort_parallel.jl | Parallel merge-sort. |
 |               | mm_divide_and_conquer | mm_divide_and_conquer.jl | Divide-and-conquer matrix multiply. |
 |               | big_arrays | objarray.jl | Allocates large arrays of boxed objects, each containing a small number of references. |
 |               | big_arrays | issue-52937.jl | Parallel allocation of arrays of immutable types. |
+| Compiler | inference | inference_benchmarks.jl | Runs type inference on various workloads, stressing compiler allocation patterns. |
+| Fragmentation | synthetic | exploit_free_list.jl | Exploits free-list size classes to create heap fragmentation. |
 | Slow | rb\_tree | rb\_tree.jl | Pointer graph whose minimum linear arrangement has cost Θ(n²). |
-|      | pidigits | pidigits.jl | Tests large `BigInt`s. |
+|      | bigint | pidigits.jl | Tests large `BigInt`s. |

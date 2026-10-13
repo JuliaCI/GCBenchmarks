@@ -23,7 +23,7 @@ function main(args)
               "mark time [ms]",
               "sweep time [ms]",
               "max pause [ms]",
-              "max memory [MB]",
+              "max rss [MB]",
               "pct gc"]
     header = ["", f1, f2]
 
@@ -33,7 +33,7 @@ function main(args)
                 js1["mark time"][2] js2["mark time"][2];
                 js1["sweep time"][2] js2["sweep time"][2];
                 js1["max pause"][2] js2["max pause"][2];
-                js1["max memory"][2] js2["max memory"][2];
+                js1["max rss"][2] js2["max rss"][2];
                 js1["pct gc"][2] js2["pct gc"][2]]
 
     data = hcat(labels, raw_data)

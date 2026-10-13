@@ -59,13 +59,20 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
     gc_diff = []
     gc_end = []
     gc_start = []
+    maxrss = []
     for _ in 1:runs
         # uglyness to communicate over non stdout (specifically file descriptor 3)
         p = Base.PipeEndpoint()
         _gcthreads = gcthreads == 0 ? `` : `--gcthreads=$gcthreads`
         cmd = `$JULIAVER --project=. --threads=$threads $_gcthreads $file SERIALIZE`
         cmd = run(Base.CmdRedirect(cmd, p, 3), stdin, stdout, stderr, wait=false)
-        r = deserialize(p)
+        r = try
+            deserialize(p)
+        catch
+            wait(cmd)
+            @warn "Benchmark run died (exit code $(cmd.exitcode), signal $(cmd.termsignal)); skipping run" file
+            continue
+        end
         @assert success(cmd)
         # end uglyness
         push!(value, r.value)
@@ -73,6 +80,11 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
         push!(gc_diff, r.gc_diff)
         push!(gc_end, r.gc_end)
         push!(gc_start, r.gc_start)
+        push!(maxrss, r.maxrss)
+    end
+    if isempty(times)
+        @warn "All runs of benchmark failed; no results" file
+        return
     end
     gc_times =  extract(gc_end, gc_start, :total_time)
     mark_times = extract(gc_end, gc_start, :total_mark_time)
@@ -81,6 +93,10 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
     ncollect = extract(gc_end, gc_start, :collect)
     nfull_sweep = extract(gc_end, gc_start, :full_sweep)
 
+    # Use the number of runs that actually produced results, not `runs`: a run
+    # whose child died is skipped above, and a mismatched column length here
+    # would throw instead of reporting the runs that did succeed.
+    nresults = length(times)
     data = Table(
         time = times,
         gc_time = gc_times,
@@ -89,10 +105,11 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
         time_to_safepoint = times_to_safepoint,
         ncollections = ncollect,
         nfull_sweeps = nfull_sweep,
-        file = [file for _ in 1:runs],
-        threads = [threads for _ in 1:runs],
-        gcthreads = [gcthreads for _ in 1:runs],
-        version = [string(Base.VERSION) for _ in 1:runs],
+        maxrss = maxrss,
+        file = [file for _ in 1:nresults],
+        threads = [threads for _ in 1:nresults],
+        gcthreads = [gcthreads for _ in 1:nresults],
+        version = [string(Base.VERSION) for _ in 1:nresults],
     )
     results = joinpath(@__DIR__, "results.csv")
     CSV.write(results, data; append=isfile(results))
@@ -104,11 +121,11 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
     time_to_safepoint = get_stats(times_to_safepoint) ./ 1_000
 
     max_pause = get_stats(map(stat->stat.max_pause, gc_end)) ./ 1_000_000
-    max_mem = get_stats(map(stat->stat.max_memory, gc_end)) ./ 1024^2
+    max_rss = get_stats(maxrss) ./ 1024^2
     pct_gc = get_stats(map((t,stat)->(stat.total_time/t), times, gc_diff)) .* 100
 
-    header = (["", "total time", "gc time", "mark time", "sweep time", "max GC pause", "time to safepoint", "max heap", "percent gc"],
-              ["", "ms",         "ms",       "ms",          "ms",       "ms",          "us",                "MB",       "%"        ])
+    header = (["", "total time", "gc time", "mark time", "sweep time", "max GC pause", "time to safepoint", "max rss", "percent gc"],
+              ["", "ms",         "ms",       "ms",          "ms",       "ms",          "us",                "MB",      "%"        ])
     labels = ["minimum", "median", "maximum", "stdev"]
     highlighters = highlight_col(6, 10, 100) # max pause
     append!(highlighters, highlight_col(7, 1, 10)) # time to safepoint
@@ -121,11 +138,11 @@ function run_bench(runs, threads, gcthreads, file, show_json = false)
                      ("sweep time", sweep_time),
                      ("max pause", max_pause),
                      ("ttsp", time_to_safepoint),
-                     ("max memory", max_mem),
+                     ("max rss", max_rss),
                      ("pct gc", pct_gc)])
         JSON.print(data)
     else
-        data = hcat(labels, total_stats, gc_time, mark_time, sweep_time, max_pause, time_to_safepoint, max_mem, pct_gc)
+        data = hcat(labels, total_stats, gc_time, mark_time, sweep_time, max_pause, time_to_safepoint, max_rss, pct_gc)
         pretty_table(data; header, formatters=ft_printf("%0.0f"), highlighters)
     end
 end
